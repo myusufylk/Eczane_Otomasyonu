@@ -16,6 +16,8 @@ namespace Eczane_Otomasyonu
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            DevExpress.UserSkins.BonusSkins.Register();
+            DevExpress.LookAndFeel.UserLookAndFeel.Default.SetSkinStyle("WXI"); // veya "The Bezier"
             Application.Run(new FrmGiris());
         }
     }
