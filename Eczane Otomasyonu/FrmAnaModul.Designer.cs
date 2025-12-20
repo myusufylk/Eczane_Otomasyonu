@@ -37,12 +37,18 @@
             this.btnSatislar = new DevExpress.XtraBars.BarButtonItem();
             this.btnCikis = new DevExpress.XtraBars.BarButtonItem();
             this.btnRaporlar = new DevExpress.XtraBars.BarButtonItem();
+            this.btnRibbonYapayZeka = new DevExpress.XtraBars.BarButtonItem();
+            this.btnRibbonTahmin = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem1 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.ribbonPageGroup1 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup2 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup3 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup4 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup5 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
+            this.ribbonPageAsistan = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
+            this.ribbonPageAyarlar = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonStatusBar = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
             this.xtraTabbedMdiManager1 = new DevExpress.XtraTabbedMdi.XtraTabbedMdiManager(this.components);
             this.pnlTahmin = new DevExpress.XtraEditors.GroupControl();
@@ -53,15 +59,22 @@
             this.dateTahminBitis = new DevExpress.XtraEditors.DateEdit();
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.btnTahminAc = new DevExpress.XtraEditors.SimpleButton();
             this.flowSohbet = new System.Windows.Forms.FlowLayoutPanel();
+            this.lstBildirimler = new DevExpress.XtraEditors.ListBoxControl();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
             this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
             this.btnGonder = new DevExpress.XtraEditors.SimpleButton();
             this.txtMesaj = new DevExpress.XtraEditors.TextEdit();
-            this.button1 = new System.Windows.Forms.Button();
             this.btnBildirim = new DevExpress.XtraEditors.SimpleButton();
-            this.lstBildirimler = new DevExpress.XtraEditors.ListBoxControl();
+            this.pnlAyarlar = new DevExpress.XtraEditors.PanelControl();
+            this.btnResimSec = new DevExpress.XtraEditors.SimpleButton();
+            this.peLogo = new DevExpress.XtraEditors.PictureEdit();
+            this.btnAyarlarKaydet = new DevExpress.XtraEditors.SimpleButton();
+            this.btnAyarlarKapat = new DevExpress.XtraEditors.SimpleButton();
+            this.txtIsletmeAdres = new DevExpress.XtraEditors.TextEdit();
+            this.txtIsletmeTel = new DevExpress.XtraEditors.TextEdit();
+            this.txtIsletmeSahip = new DevExpress.XtraEditors.TextEdit();
+            this.txtIsletmeAdi = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlTahmin)).BeginInit();
@@ -69,10 +82,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.cmbIlaclar.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTahminBitis.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTahminBitis.Properties.CalendarTimeProperties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtMesaj.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pnlAyarlar)).BeginInit();
+            this.pnlAyarlar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.peLogo.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeAdres.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeTel.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeSahip.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeAdi.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // ribbon
@@ -85,9 +105,13 @@
             this.btnPersonel,
             this.btnSatislar,
             this.btnCikis,
-            this.btnRaporlar});
+            this.btnRaporlar,
+            this.btnRibbonYapayZeka,
+            this.btnRibbonTahmin,
+            this.barButtonItem1,
+            this.barButtonItem2});
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 8;
+            this.ribbon.MaxItemId = 12;
             this.ribbon.Name = "ribbon";
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1});
@@ -98,6 +122,7 @@
             // 
             this.btnIlaclar.Caption = "İLAÇLAR";
             this.btnIlaclar.Id = 1;
+            this.btnIlaclar.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnIlaclar.ImageOptions.Image")));
             this.btnIlaclar.Name = "btnIlaclar";
             this.btnIlaclar.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btnIlaclar.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnIlaclar_ItemClick);
@@ -106,6 +131,7 @@
             // 
             this.btnMusteriler.Caption = "HASTALAR";
             this.btnMusteriler.Id = 2;
+            this.btnMusteriler.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnMusteriler.ImageOptions.LargeImage")));
             this.btnMusteriler.Name = "btnMusteriler";
             this.btnMusteriler.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btnMusteriler.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnHastalar_ItemClick);
@@ -120,6 +146,7 @@
             // 
             this.btnSatislar.Caption = "SATIŞLAR";
             this.btnSatislar.Id = 5;
+            this.btnSatislar.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnSatislar.ImageOptions.LargeImage")));
             this.btnSatislar.Name = "btnSatislar";
             this.btnSatislar.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btnSatislar.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSatislar_ItemClick);
@@ -134,11 +161,45 @@
             // 
             // btnRaporlar
             // 
-            this.btnRaporlar.Caption = "RAPORLAR";
+            this.btnRaporlar.Caption = "SATIŞ RAPORLARI\r\n";
             this.btnRaporlar.Id = 7;
+            this.btnRaporlar.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("btnRaporlar.ImageOptions.LargeImage")));
             this.btnRaporlar.Name = "btnRaporlar";
             this.btnRaporlar.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btnRaporlar.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRaporlar_ItemClick);
+            // 
+            // btnRibbonYapayZeka
+            // 
+            this.btnRibbonYapayZeka.Caption = "Yapay Zeka";
+            this.btnRibbonYapayZeka.Id = 8;
+            this.btnRibbonYapayZeka.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnRibbonYapayZeka.ImageOptions.Image")));
+            this.btnRibbonYapayZeka.Name = "btnRibbonYapayZeka";
+            this.btnRibbonYapayZeka.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            this.btnRibbonYapayZeka.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRibbonYapayZeka_ItemClick);
+            // 
+            // btnRibbonTahmin
+            // 
+            this.btnRibbonTahmin.Caption = "Satış Tahmini";
+            this.btnRibbonTahmin.Id = 9;
+            this.btnRibbonTahmin.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnRibbonTahmin.ImageOptions.SvgImage")));
+            this.btnRibbonTahmin.Name = "btnRibbonTahmin";
+            this.btnRibbonTahmin.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRibbonTahmin_ItemClick);
+            // 
+            // barButtonItem1
+            // 
+            this.barButtonItem1.Caption = "ÇIKIŞ\r\n";
+            this.barButtonItem1.Id = 10;
+            this.barButtonItem1.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("barButtonItem1.ImageOptions.SvgImage")));
+            this.barButtonItem1.Name = "barButtonItem1";
+            this.barButtonItem1.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnCikis_ItemClick);
+            // 
+            // barButtonItem2
+            // 
+            this.barButtonItem2.Caption = "AYARLAR\r\n";
+            this.barButtonItem2.Id = 11;
+            this.barButtonItem2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("barButtonItem2.ImageOptions.SvgImage")));
+            this.barButtonItem2.Name = "barButtonItem2";
+            this.barButtonItem2.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnRibbonAyarlar_ItemClick);
             // 
             // ribbonPage1
             // 
@@ -147,7 +208,9 @@
             this.ribbonPageGroup2,
             this.ribbonPageGroup3,
             this.ribbonPageGroup4,
-            this.ribbonPageGroup5});
+            this.ribbonPageGroup5,
+            this.ribbonPageAsistan,
+            this.ribbonPageAyarlar});
             this.ribbonPage1.Name = "ribbonPage1";
             // 
             // ribbonPageGroup1
@@ -172,8 +235,21 @@
             // 
             // ribbonPageGroup5
             // 
-            this.ribbonPageGroup5.ItemLinks.Add(this.btnCikis);
+            this.ribbonPageGroup5.ItemLinks.Add(this.barButtonItem1);
             this.ribbonPageGroup5.Name = "ribbonPageGroup5";
+            // 
+            // ribbonPageAsistan
+            // 
+            this.ribbonPageAsistan.ItemLinks.Add(this.btnRibbonYapayZeka);
+            this.ribbonPageAsistan.ItemLinks.Add(this.btnRibbonTahmin);
+            this.ribbonPageAsistan.Name = "ribbonPageAsistan";
+            this.ribbonPageAsistan.Text = "ASİSTAN & ARAÇLAR";
+            // 
+            // ribbonPageAyarlar
+            // 
+            this.ribbonPageAyarlar.ItemLinks.Add(this.barButtonItem2);
+            this.ribbonPageAyarlar.Name = "ribbonPageAyarlar";
+            this.ribbonPageAyarlar.Text = "PROFİL";
             // 
             // ribbonStatusBar
             // 
@@ -277,22 +353,6 @@
             this.labelControl1.TabIndex = 0;
             this.labelControl1.Text = "İLAÇ ADI :";
             // 
-            // btnTahminAc
-            // 
-            this.btnTahminAc.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.btnTahminAc.Appearance.Options.UseFont = true;
-            this.btnTahminAc.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnTahminAc.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnTahminAc.ImageOptions.Image")));
-            this.btnTahminAc.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
-            this.btnTahminAc.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.btnTahminAc.Location = new System.Drawing.Point(1705, 950);
-            this.btnTahminAc.Name = "btnTahminAc";
-            this.btnTahminAc.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnTahminAc.Size = new System.Drawing.Size(167, 49);
-            this.btnTahminAc.TabIndex = 4;
-            this.btnTahminAc.Text = "SATIŞ TAHMİNİ";
-            this.btnTahminAc.Click += new System.EventHandler(this.btnTahminAc_Click);
-            // 
             // flowSohbet
             // 
             this.flowSohbet.AutoScroll = true;
@@ -303,15 +363,23 @@
             this.flowSohbet.TabIndex = 7;
             this.flowSohbet.WrapContents = false;
             // 
+            // lstBildirimler
+            // 
+            this.lstBildirimler.Location = new System.Drawing.Point(482, 799);
+            this.lstBildirimler.Name = "lstBildirimler";
+            this.lstBildirimler.Size = new System.Drawing.Size(403, 120);
+            this.lstBildirimler.TabIndex = 13;
+            this.lstBildirimler.Visible = false;
+            // 
             // panelControl1
             // 
             this.panelControl1.Controls.Add(this.simpleButton1);
             this.panelControl1.Controls.Add(this.btnGonder);
             this.panelControl1.Controls.Add(this.txtMesaj);
             this.panelControl1.Controls.Add(this.flowSohbet);
-            this.panelControl1.Location = new System.Drawing.Point(12, 578);
+            this.panelControl1.Location = new System.Drawing.Point(12, 731);
             this.panelControl1.Name = "panelControl1";
-            this.panelControl1.Size = new System.Drawing.Size(413, 263);
+            this.panelControl1.Size = new System.Drawing.Size(417, 277);
             this.panelControl1.TabIndex = 8;
             this.panelControl1.Visible = false;
             // 
@@ -329,7 +397,7 @@
             // btnGonder
             // 
             this.btnGonder.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnGonder.ImageOptions.SvgImage")));
-            this.btnGonder.Location = new System.Drawing.Point(364, 229);
+            this.btnGonder.Location = new System.Drawing.Point(364, 236);
             this.btnGonder.Name = "btnGonder";
             this.btnGonder.Size = new System.Drawing.Size(44, 34);
             this.btnGonder.TabIndex = 9;
@@ -343,35 +411,119 @@
             this.txtMesaj.Size = new System.Drawing.Size(353, 20);
             this.txtMesaj.TabIndex = 8;
             // 
-            // button1
-            // 
-            this.button1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button1.BackgroundImage")));
-            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button1.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.button1.Location = new System.Drawing.Point(17, 920);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(96, 63);
-            this.button1.TabIndex = 9;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // btnBildirim
             // 
             this.btnBildirim.AutoSize = true;
             this.btnBildirim.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnBildirim.ImageOptions.Image")));
-            this.btnBildirim.Location = new System.Drawing.Point(141, 960);
+            this.btnBildirim.Location = new System.Drawing.Point(12, 934);
             this.btnBildirim.Name = "btnBildirim";
             this.btnBildirim.Size = new System.Drawing.Size(38, 36);
             this.btnBildirim.TabIndex = 12;
             this.btnBildirim.Click += new System.EventHandler(this.btnBildirim_Click);
             // 
-            // lstBildirimler
+            // pnlAyarlar
             // 
-            this.lstBildirimler.Location = new System.Drawing.Point(189, 888);
-            this.lstBildirimler.Name = "lstBildirimler";
-            this.lstBildirimler.Size = new System.Drawing.Size(403, 120);
-            this.lstBildirimler.TabIndex = 13;
-            this.lstBildirimler.Visible = false;
+            this.pnlAyarlar.Controls.Add(this.btnResimSec);
+            this.pnlAyarlar.Controls.Add(this.peLogo);
+            this.pnlAyarlar.Controls.Add(this.btnAyarlarKaydet);
+            this.pnlAyarlar.Controls.Add(this.btnAyarlarKapat);
+            this.pnlAyarlar.Controls.Add(this.txtIsletmeAdres);
+            this.pnlAyarlar.Controls.Add(this.txtIsletmeTel);
+            this.pnlAyarlar.Controls.Add(this.txtIsletmeSahip);
+            this.pnlAyarlar.Controls.Add(this.txtIsletmeAdi);
+            this.pnlAyarlar.Location = new System.Drawing.Point(549, 198);
+            this.pnlAyarlar.Name = "pnlAyarlar";
+            this.pnlAyarlar.Size = new System.Drawing.Size(531, 260);
+            this.pnlAyarlar.TabIndex = 16;
+            this.pnlAyarlar.Visible = false;
+            // 
+            // btnResimSec
+            // 
+            this.btnResimSec.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleCenter;
+            this.btnResimSec.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnResimSec.ImageOptions.SvgImage")));
+            this.btnResimSec.Location = new System.Drawing.Point(345, 185);
+            this.btnResimSec.Name = "btnResimSec";
+            this.btnResimSec.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnResimSec.Size = new System.Drawing.Size(128, 41);
+            this.btnResimSec.TabIndex = 7;
+            this.btnResimSec.Click += new System.EventHandler(this.btnResimSec_Click);
+            // 
+            // peLogo
+            // 
+            this.peLogo.Location = new System.Drawing.Point(345, 20);
+            this.peLogo.MenuManager = this.ribbon;
+            this.peLogo.Name = "peLogo";
+            this.peLogo.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
+            this.peLogo.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
+            this.peLogo.Size = new System.Drawing.Size(128, 159);
+            this.peLogo.TabIndex = 6;
+            // 
+            // btnAyarlarKaydet
+            // 
+            this.btnAyarlarKaydet.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnAyarlarKaydet.Appearance.Options.UseFont = true;
+            this.btnAyarlarKaydet.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnAyarlarKaydet.ImageOptions.Image")));
+            this.btnAyarlarKaydet.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleRight;
+            this.btnAyarlarKaydet.Location = new System.Drawing.Point(97, 196);
+            this.btnAyarlarKaydet.Name = "btnAyarlarKaydet";
+            this.btnAyarlarKaydet.Size = new System.Drawing.Size(120, 30);
+            this.btnAyarlarKaydet.TabIndex = 5;
+            this.btnAyarlarKaydet.Text = "KAYDET";
+            this.btnAyarlarKaydet.Click += new System.EventHandler(this.btnAyarlarKaydet_Click);
+            // 
+            // btnAyarlarKapat
+            // 
+            this.btnAyarlarKapat.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnAyarlarKapat.ImageOptions.Image")));
+            this.btnAyarlarKapat.Location = new System.Drawing.Point(491, 0);
+            this.btnAyarlarKapat.Name = "btnAyarlarKapat";
+            this.btnAyarlarKapat.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnAyarlarKapat.Size = new System.Drawing.Size(35, 35);
+            this.btnAyarlarKapat.TabIndex = 4;
+            this.btnAyarlarKapat.Click += new System.EventHandler(this.btnAyarlarKapat_Click);
+            // 
+            // txtIsletmeAdres
+            // 
+            this.txtIsletmeAdres.Location = new System.Drawing.Point(5, 151);
+            this.txtIsletmeAdres.MenuManager = this.ribbon;
+            this.txtIsletmeAdres.Name = "txtIsletmeAdres";
+            this.txtIsletmeAdres.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtIsletmeAdres.Properties.Appearance.Options.UseFont = true;
+            this.txtIsletmeAdres.Properties.NullValuePrompt = "İŞLETME ADRESİ";
+            this.txtIsletmeAdres.Size = new System.Drawing.Size(283, 28);
+            this.txtIsletmeAdres.TabIndex = 3;
+            // 
+            // txtIsletmeTel
+            // 
+            this.txtIsletmeTel.Location = new System.Drawing.Point(5, 106);
+            this.txtIsletmeTel.MenuManager = this.ribbon;
+            this.txtIsletmeTel.Name = "txtIsletmeTel";
+            this.txtIsletmeTel.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtIsletmeTel.Properties.Appearance.Options.UseFont = true;
+            this.txtIsletmeTel.Properties.NullValuePrompt = "İŞLETME NO";
+            this.txtIsletmeTel.Size = new System.Drawing.Size(283, 28);
+            this.txtIsletmeTel.TabIndex = 2;
+            // 
+            // txtIsletmeSahip
+            // 
+            this.txtIsletmeSahip.Location = new System.Drawing.Point(5, 60);
+            this.txtIsletmeSahip.MenuManager = this.ribbon;
+            this.txtIsletmeSahip.Name = "txtIsletmeSahip";
+            this.txtIsletmeSahip.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtIsletmeSahip.Properties.Appearance.Options.UseFont = true;
+            this.txtIsletmeSahip.Properties.NullValuePrompt = "İŞLETME SAHİBİ";
+            this.txtIsletmeSahip.Size = new System.Drawing.Size(283, 28);
+            this.txtIsletmeSahip.TabIndex = 1;
+            // 
+            // txtIsletmeAdi
+            // 
+            this.txtIsletmeAdi.Location = new System.Drawing.Point(5, 17);
+            this.txtIsletmeAdi.MenuManager = this.ribbon;
+            this.txtIsletmeAdi.Name = "txtIsletmeAdi";
+            this.txtIsletmeAdi.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtIsletmeAdi.Properties.Appearance.Options.UseFont = true;
+            this.txtIsletmeAdi.Properties.NullValuePrompt = "İŞLETME ADI";
+            this.txtIsletmeAdi.Size = new System.Drawing.Size(283, 28);
+            this.txtIsletmeAdi.TabIndex = 0;
             // 
             // FrmAnaModul
             // 
@@ -379,9 +531,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
             this.Controls.Add(this.lstBildirimler);
+            this.Controls.Add(this.pnlAyarlar);
             this.Controls.Add(this.btnBildirim);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.btnTahminAc);
             this.Controls.Add(this.panelControl1);
             this.Controls.Add(this.pnlTahmin);
             this.Controls.Add(this.ribbonStatusBar);
@@ -398,10 +549,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.cmbIlaclar.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTahminBitis.Properties.CalendarTimeProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTahminBitis.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
             this.panelControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.txtMesaj.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pnlAyarlar)).EndInit();
+            this.pnlAyarlar.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.peLogo.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeAdres.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeTel.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeSahip.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtIsletmeAdi.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -422,7 +580,6 @@
         private DevExpress.XtraBars.BarButtonItem btnRaporlar;
         private DevExpress.XtraEditors.GroupControl pnlTahmin;
         private DevExpress.XtraEditors.LabelControl labelControl1;
-        private DevExpress.XtraEditors.SimpleButton btnTahminAc;
         private DevExpress.XtraEditors.SimpleButton btnPanelKapat;
         private DevExpress.XtraEditors.LabelControl lblTahminSonuc;
         private DevExpress.XtraEditors.SimpleButton btnTahminHesapla;
@@ -433,7 +590,6 @@
         private DevExpress.XtraEditors.SimpleButton btnGonder;
         private DevExpress.XtraEditors.TextEdit txtMesaj;
         private DevExpress.XtraEditors.SimpleButton simpleButton1;
-        private System.Windows.Forms.Button button1;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup2;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup3;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup4;
@@ -441,5 +597,20 @@
         private DevExpress.XtraEditors.ComboBoxEdit cmbIlaclar;
         private DevExpress.XtraEditors.ListBoxControl lstBildirimler;
         private DevExpress.XtraEditors.SimpleButton btnBildirim;
+        private DevExpress.XtraBars.BarButtonItem btnRibbonYapayZeka;
+        private DevExpress.XtraBars.BarButtonItem btnRibbonTahmin;
+        private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageAsistan;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem1;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem2;
+        private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageAyarlar;
+        private DevExpress.XtraEditors.PanelControl pnlAyarlar;
+        private DevExpress.XtraEditors.TextEdit txtIsletmeAdres;
+        private DevExpress.XtraEditors.TextEdit txtIsletmeTel;
+        private DevExpress.XtraEditors.TextEdit txtIsletmeSahip;
+        private DevExpress.XtraEditors.TextEdit txtIsletmeAdi;
+        private DevExpress.XtraEditors.SimpleButton btnAyarlarKaydet;
+        private DevExpress.XtraEditors.SimpleButton btnAyarlarKapat;
+        private DevExpress.XtraEditors.SimpleButton btnResimSec;
+        private DevExpress.XtraEditors.PictureEdit peLogo;
     }
 }

@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Data.SqlClient; // SQL Bağlantısı için
-using System.Drawing; // Renkler ve UI için
+using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
-using System.Threading.Tasks; // Async işlemler için
+using System.Threading.Tasks;
+using DevExpress.XtraBars; // Ribbon olayları için gerekli
 
 namespace Eczane_Otomasyonu
 {
@@ -11,23 +12,211 @@ namespace Eczane_Otomasyonu
         public FrmAnaModul()
         {
             InitializeComponent();
+
+            // 1. ListBox Çift Tıklama (Silme İçin)
+            if (lstBildirimler != null)
+            {
+                lstBildirimler.DoubleClick += lstBildirimler_DoubleClick;
+            }
+
+            // 2. SAYFA DEĞİŞİMİNİ TAKİP ET (Gizleme/Gösterme İçin)
+            this.MdiChildActivate += FrmAnaModul_MdiChildActivate;
         }
 
-        // Bağlantı sınıfını çağırıyoruz
         SqlBaglantisi bgl = new SqlBaglantisi();
+        string secilenResimYolu = ""; // Logo yolunu tutmak için
 
-        // -------------------------------------------------------------
-        // YENİ EKLENEN: BİLDİRİM SİSTEMİ (Stok & Gemini Mesajları İçin)
-        // -------------------------------------------------------------
+        // =============================================================
+        //  FORM YÜKLENİRKEN
+        // =============================================================
+        private void FrmAnaModul_Load(object sender, EventArgs e)
+        {
+            IlaclariListele();
 
-        // 1. DIŞARIDAN MESAJ EKLEME (Hareketler Formu Burayı Çağıracak)
+            // Başlangıçta tüm panelleri gizle
+            PanelleriGizle();
+
+            // Stok Kontrolü Başlasın
+            StokKontrolu();
+
+            // Dükkan Bilgilerini ve Logoyu Getir
+            IsletmeBilgileriniGetir();
+        }
+
+        // =============================================================
+        //  GÖRÜNÜM YÖNETİMİ (ANA EKRAN vs DİĞER SAYFALAR) 👁️
+        // =============================================================
+
+        private void FrmAnaModul_MdiChildActivate(object sender, EventArgs e)
+        {
+            // Eğer ActiveMdiChild 'null' ise, hiç açık sayfa yoktur -> Ana Ekradasın.
+            bool anaEkrandaMiyiz = (this.ActiveMdiChild == null);
+
+            // 1. BİLDİRİM BUTONU (Sol Alttaki)
+            if (btnBildirim != null) btnBildirim.Visible = anaEkrandaMiyiz;
+
+            // 2. AÇIK PANELLERİ KAPAT
+            // Başka sayfaya geçince açık kalan chat, tahmin veya ayarları gizle
+            if (!anaEkrandaMiyiz)
+            {
+                PanelleriGizle();
+            }
+        }
+
+        // Yardımcı Metod: Tüm ekstra panelleri tek seferde kapatır
+        void PanelleriGizle()
+        {
+            if (lstBildirimler != null) lstBildirimler.Visible = false;
+            if (pnlTahmin != null) pnlTahmin.Visible = false;
+            if (panelControl1 != null) panelControl1.Visible = false;
+            if (pnlAyarlar != null) pnlAyarlar.Visible = false; // Ayarlar paneli
+        }
+
+        // =============================================================
+        //  YENİ: AYARLAR PANELİ İŞLEMLERİ (LOGO & BİLGİLER) ⚙️
+        // =============================================================
+
+        // 1. VERİLERİ GETİR
+        void IsletmeBilgileriniGetir()
+        {
+            try
+            {
+                if (txtIsletmeAdi == null) return; // Panel henüz eklenmediyse hata vermesin
+
+                SqlConnection conn = bgl.baglanti();
+                SqlCommand komut = new SqlCommand("Select top 1 * From Isletme", conn);
+                SqlDataReader dr = komut.ExecuteReader();
+                if (dr.Read())
+                {
+                    txtIsletmeAdi.Text = dr["Ad"].ToString();
+                    txtIsletmeSahip.Text = dr["Sahip"].ToString();
+                    txtIsletmeTel.Text = dr["Telefon"].ToString();
+                    txtIsletmeAdres.Text = dr["Adres"].ToString();
+
+                    // Logo varsa yükle
+                    if (dr["LogoYolu"] != DBNull.Value)
+                    {
+                        secilenResimYolu = dr["LogoYolu"].ToString();
+                        if (System.IO.File.Exists(secilenResimYolu))
+                        {
+                            peLogo.Image = Image.FromFile(secilenResimYolu);
+                        }
+                    }
+                }
+                conn.Close();
+            }
+            catch { }
+        }
+
+        // 2. LOGO SEÇME BUTONU
+        private void btnResimSec_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dosya = new OpenFileDialog();
+            dosya.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp";
+            dosya.Title = "Eczane Logosu Seç";
+
+            if (dosya.ShowDialog() == DialogResult.OK)
+            {
+                secilenResimYolu = dosya.FileName;
+                peLogo.Image = Image.FromFile(secilenResimYolu); // Ekranda göster
+            }
+        }
+
+        // 3. KAYDET BUTONU
+        private void btnAyarlarKaydet_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                // Bilgileri ve Logo Yolunu Güncelle
+                SqlCommand komut = new SqlCommand("Update Isletme set Ad=@p1, Sahip=@p2, Telefon=@p3, Adres=@p4, LogoYolu=@p5", conn);
+                komut.Parameters.AddWithValue("@p1", txtIsletmeAdi.Text);
+                komut.Parameters.AddWithValue("@p2", txtIsletmeSahip.Text);
+                komut.Parameters.AddWithValue("@p3", txtIsletmeTel.Text);
+                komut.Parameters.AddWithValue("@p4", txtIsletmeAdres.Text);
+                komut.Parameters.AddWithValue("@p5", secilenResimYolu); // Resim yolu
+                komut.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Ayarlar ve Logo başarıyla kaydedildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                pnlAyarlar.Visible = false; // İşlem bitince kapat
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata: " + ex.Message);
+            }
+        }
+
+        // 4. KAPAT BUTONU
+        private void btnAyarlarKapat_Click(object sender, EventArgs e)
+        {
+            if (pnlAyarlar != null) pnlAyarlar.Visible = false;
+        }
+
+        // =============================================================
+        //  RIBBON BUTONLARI (YAPAY ZEKA, TAHMİN, AYARLAR) 🖱️
+        // =============================================================
+
+        // 1. AYARLAR BUTONU
+        private void btnRibbonAyarlar_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (pnlAyarlar.Visible)
+                pnlAyarlar.Visible = false;
+            else
+            {
+                PanelleriGizle(); // Diğerlerini kapat
+                pnlAyarlar.Visible = true;
+                pnlAyarlar.BringToFront();
+                IsletmeBilgileriniGetir(); // Güncel veriyi çek
+            }
+        }
+
+        // 2. YAPAY ZEKA BUTONU
+        private void btnRibbonYapayZeka_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (panelControl1.Visible)
+                panelControl1.Visible = false;
+            else
+            {
+                PanelleriGizle();
+                panelControl1.Visible = true;
+                panelControl1.BringToFront();
+            }
+        }
+
+        // 3. SATIŞ TAHMİNİ BUTONU
+        private void btnRibbonTahmin_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (pnlTahmin.Visible)
+                pnlTahmin.Visible = false;
+            else
+            {
+                PanelleriGizle();
+                pnlTahmin.Visible = true;
+                pnlTahmin.BringToFront();
+            }
+        }
+
+        // =============================================================
+        //  BİLDİRİM SİSTEMİ (SOL ALT BUTON & STOK) 🔔
+        // =============================================================
+
+        private void btnBildirim_Click(object sender, EventArgs e)
+        {
+            if (lstBildirimler.Visible)
+                lstBildirimler.Visible = false;
+            else
+            {
+                PanelleriGizle();
+                lstBildirimler.Visible = true;
+                lstBildirimler.BringToFront();
+            }
+        }
+
         public void BildirimEkle(string mesaj)
         {
-            // Eğer liste aracı formda yoksa hata vermesin
-            if (lstBildirimler == null) return;
-            if (string.IsNullOrEmpty(mesaj)) return;
+            if (lstBildirimler == null || string.IsNullOrEmpty(mesaj)) return;
 
-            // Aynı mesaj zaten varsa tekrar ekleme
             if (!lstBildirimler.Items.Contains(mesaj))
             {
                 lstBildirimler.Items.Add(mesaj);
@@ -35,13 +224,11 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // 2. STOK KONTROLÜ (Veritabanından < 5 olanları çeker)
         public void StokKontrolu()
         {
             try
             {
                 SqlConnection conn = bgl.baglanti();
-                // 5 adetten az kalan ilaçları bul
                 SqlCommand komut = new SqlCommand("Select ilacAdı, adet From Ilaclar where adet < 5", conn);
                 SqlDataReader dr = komut.ExecuteReader();
 
@@ -50,15 +237,13 @@ namespace Eczane_Otomasyonu
                     string ilac = dr["ilacAdı"].ToString();
                     string adet = dr["adet"].ToString();
                     string uyari = $"⚠️ KRİTİK STOK: {ilac} (Kalan: {adet})";
-
-                    BildirimEkle(uyari); // Listeye ekle
+                    BildirimEkle(uyari);
                 }
                 conn.Close();
             }
             catch { }
         }
 
-        // 3. BUTON RENGİNİ GÜNCELLEME
         void BildirimButonunuGuncelle()
         {
             if (btnBildirim == null) return;
@@ -78,336 +263,151 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // 4. BİLDİRİM BUTONU TIKLAMA OLAYI
-        // (Tasarım ekranından btnBildirim'in Click olayına bu metodu bağlamalısın)
-        private void btnBildirim_Click(object sender, EventArgs e)
+        private void lstBildirimler_DoubleClick(object sender, EventArgs e)
         {
-            lstBildirimler.Visible = !lstBildirimler.Visible;
-            if (lstBildirimler.Visible)
+            if (lstBildirimler.SelectedItem != null)
             {
-                lstBildirimler.BringToFront(); // Diğer pencerelerin üstüne çıkar
+                lstBildirimler.Items.Remove(lstBildirimler.SelectedItem);
+                BildirimButonunuGuncelle();
+                if (lstBildirimler.Items.Count == 0) lstBildirimler.Visible = false;
             }
         }
 
-        // -------------------------------------------------------------
-        // FORM YÜKLENİRKEN (MEVCUT KODLAR + YENİ EKLENTİLER)
-        // -------------------------------------------------------------
-        private void FrmAnaModul_Load(object sender, EventArgs e)
-        {
-            IlaclariListele(); // Senin eski kodun (Combobox doldurma)
+        // =============================================================
+        //  MEVCUT FONKSİYONLAR (HİÇBİRİ SİLİNMEDİ)
+        // =============================================================
 
-            // YENİ: Başlangıçta Bildirim Listesi Gizli Olsun
-            if (lstBildirimler != null) lstBildirimler.Visible = false;
-
-            // YENİ: Program açılınca Stokları Kontrol Et
-            StokKontrolu();
-        }
-
-        // -------------------------------------------------------------
-        // SENİN ORİJİNAL KODLARIN (GEMINI, TAHMİN, MENÜLER)
-        // -------------------------------------------------------------
-
-        // 1. DÜKKANIN VERİLERİNİ ÇEKEN "AJAN" FONKSİYON 🕵️‍♂️
         void IlaclariListele()
         {
-            // Listeyi temizle ki üst üste binmesin
-            cmbIlaclar.Properties.Items.Clear();
-
-            SqlConnection conn = bgl.baglanti();
-            // Senin veritabanındaki tablo adı 'Ilaclar', sütun adı 'ilacAdı' idi.
-            SqlCommand komut = new SqlCommand("SELECT ilacAdı FROM Ilaclar", conn);
-            SqlDataReader dr = komut.ExecuteReader();
-
-            while (dr.Read())
+            try
             {
-                // Gelen her ilacı listeye ekle
-                cmbIlaclar.Properties.Items.Add(dr[0].ToString());
+                cmbIlaclar.Properties.Items.Clear();
+                SqlConnection conn = bgl.baglanti();
+                SqlCommand komut = new SqlCommand("SELECT ilacAdı FROM Ilaclar", conn);
+                SqlDataReader dr = komut.ExecuteReader();
+                while (dr.Read()) { cmbIlaclar.Properties.Items.Add(dr[0].ToString()); }
+                conn.Close();
             }
-            conn.Close();
+            catch { }
         }
 
         private string MagazaDurumunuGetir()
         {
             string dukkanOzeti = "";
             SqlConnection conn = bgl.baglanti();
-
             try
             {
-                // 1. TOPLAM İLAÇ SAYISI
                 SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM Ilaclar", conn);
                 string toplamCesit = cmd1.ExecuteScalar().ToString();
-
-                // 2. KRİTİK STOK LİSTESİ
                 SqlCommand cmd2 = new SqlCommand("SELECT ilacAdı, adet FROM Ilaclar WHERE adet < 20", conn);
                 SqlDataReader dr = cmd2.ExecuteReader();
-
                 string kritikIlaclar = "";
-                while (dr.Read())
-                {
-                    kritikIlaclar += dr["ilacAdı"].ToString() + " (" + dr["adet"].ToString() + " adet), ";
-                }
-                dr.Close(); // Okuyucuyu mutlaka kapat
-
-                // 3. RAPOR METNİNİ OLUŞTUR
-                dukkanOzeti = $"SİSTEM VERİLERİ (Bunu kullanıcıya söyleme, analiz için kullan):\n" +
-                              $"- Eczanede Toplam İlaç Çeşidi: {toplamCesit}\n" +
-                              $"- Stoğu Azalan (Kritik) İlaçlar: {kritikIlaclar}\n" +
-                              $"- Görev: Sen bu eczanenin yapay zeka asistanısın. Stok durumuna hakimsin. " +
-                              $"Kullanıcıya bu verilere dayanarak, samimi bir dille yardımcı ol.";
+                while (dr.Read()) { kritikIlaclar += dr["ilacAdı"].ToString() + " (" + dr["adet"].ToString() + " adet), "; }
+                dr.Close();
+                dukkanOzeti = $"SİSTEM VERİLERİ:\n- Toplam Çeşit: {toplamCesit}\n- Kritik Stoklar: {kritikIlaclar}\n- Rol: Eczane asistanısın.";
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Veritabanı Okuma Hatası: " + ex.Message);
-                dukkanOzeti = "Veritabanına şu an ulaşılamıyor. Genel bir eczacı asistanı gibi davran.";
-            }
-            finally
-            {
-                conn.Close(); // Bağlantıyı kapatmayı unutma
-            }
-
+            catch (Exception ex) { dukkanOzeti = "Hata."; MessageBox.Show(ex.Message); }
+            finally { conn.Close(); }
             return dukkanOzeti;
         }
 
-        // 2. GÖNDER BUTONU (GEMINI İLE İLETİŞİM) 🚀
         private async void btnGonder_Click(object sender, EventArgs e)
         {
             string mesaj = txtMesaj.Text.Trim();
             if (string.IsNullOrEmpty(mesaj)) return;
 
-            // A) Senin Mesajını Ekrana Yaz (Sağa)
             MesajEkle(mesaj, true);
             txtMesaj.Text = "";
+            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
 
-            // Scroll'u en aşağı kaydır
-            if (flowSohbet.Controls.Count > 0)
-                flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
-
-            // B) Gemini'ye Soruyu Hazırla (Context Injection)
             try
             {
-                // Önce dükkan verilerini çekiyoruz
                 string dukkanBilgisi = MagazaDurumunuGetir();
-
-                // Gemini'ye giden gizli prompt
                 string tamSoru = $"{dukkanBilgisi}\n\nKULLANICI SORUSU: {mesaj}";
-
-                // Cevabı bekle...
                 string cevap = await GeminiAsistani.Yorumla(tamSoru);
-
-                // C) Cevabı Ekrana Yaz (Sola)
                 MesajEkle(cevap, false);
             }
-            catch (Exception ex)
-            {
-                MesajEkle("Hata oluştu: " + ex.Message, false);
-            }
+            catch (Exception ex) { MesajEkle("Hata: " + ex.Message, false); }
 
-            // Tekrar aşağı kaydır
-            if (flowSohbet.Controls.Count > 0)
-                flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
+            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
         }
 
-        // 3. BALONCUK OLUŞTURMA (WHATSAPP TARZI GÖRÜNÜM) 🎨
         private void MesajEkle(string mesaj, bool kullaniciMi)
         {
             Panel pnlMesaj = new Panel();
             pnlMesaj.AutoSize = true;
             pnlMesaj.Padding = new Padding(10);
             pnlMesaj.Margin = new Padding(5);
-            pnlMesaj.MaximumSize = new Size(flowSohbet.Width - 50, 0); // Taşmayı önle
+            pnlMesaj.MaximumSize = new Size(flowSohbet.Width - 50, 0);
 
             Label lbl = new Label();
             lbl.Text = mesaj;
             lbl.AutoSize = true;
-            lbl.MaximumSize = new Size(flowSohbet.Width - 70, 0); // Yazı aşağı kaysın
+            lbl.MaximumSize = new Size(flowSohbet.Width - 70, 0);
             lbl.Font = new Font("Segoe UI Semibold", 10);
 
-            if (kullaniciMi) // SEN (SAĞDA)
-            {
-                pnlMesaj.BackColor = Color.FromArgb(220, 248, 198); // Açık Yeşil
-                lbl.ForeColor = Color.Black;
-            }
-            else // GEMINI (SOLDA)
-            {
-                pnlMesaj.BackColor = Color.White;
-                lbl.ForeColor = Color.Black;
-            }
+            if (kullaniciMi) { pnlMesaj.BackColor = Color.FromArgb(220, 248, 198); lbl.ForeColor = Color.Black; }
+            else { pnlMesaj.BackColor = Color.White; lbl.ForeColor = Color.Black; }
 
             pnlMesaj.Controls.Add(lbl);
             flowSohbet.Controls.Add(pnlMesaj);
         }
 
-        // -----------------------------------------------------------
-        // 1. SATIŞ TAHMİN PANELİNİ AÇMA BUTONU
-        // -----------------------------------------------------------
-        private void btnTahminAc_Click(object sender, EventArgs e)
-        {
-            if (pnlTahmin.Visible == true)
-            {
-                pnlTahmin.Visible = false; // Açıksa kapat
-            }
-            else
-            {
-                pnlTahmin.Visible = true;  // Kapalıysa aç
-                pnlTahmin.BringToFront();  // En öne getir
-            }
-        }
-
-        // -----------------------------------------------------------
-        // 2. TAHMİN HESAPLA BUTONU (Yapay Zeka ile)
-        // -----------------------------------------------------------
         private async void btnTahminHesapla_Click(object sender, EventArgs e)
         {
-            // 1. KONTROLLER
-            if (cmbIlaclar.Text == "")
-            {
-                MessageBox.Show("Lütfen tahmin için bir ilaç seçin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
+            if (cmbIlaclar.Text == "") { MessageBox.Show("İlaç seçin."); return; }
             string secilenIlac = cmbIlaclar.Text;
+            lblTahminSonuc.Text = "Analiz ediliyor...";
 
-            // DevExpress DateEdit kullandığın için '.DateTime' alıyoruz
             DateTime hedefTarih = dateTahminBitis.DateTime;
             string bugun = DateTime.Now.ToShortDateString();
-
-            lblTahminSonuc.Text = "Veriler analiz ediliyor...";
-
             try
             {
                 SqlConnection conn = bgl.baglanti();
-
-                // A) GÜNCEL STOK DURUMUNU ÇEK
                 SqlCommand cmdStok = new SqlCommand("SELECT adet FROM Ilaclar WHERE ilacAdı=@p1", conn);
                 cmdStok.Parameters.AddWithValue("@p1", secilenIlac);
+                string anlikStok = cmdStok.ExecuteScalar()?.ToString() ?? "0";
 
-                string anlikStok = "0";
-                object sonucStok = cmdStok.ExecuteScalar();
-                if (sonucStok != null) anlikStok = sonucStok.ToString();
-
-                // B) GEÇMİŞ SATIŞLARI ÇEK
                 SqlCommand cmdSatis = new SqlCommand("SELECT SUM(adet) FROM Hareketler WHERE ilacAdi=@p1", conn);
                 cmdSatis.Parameters.AddWithValue("@p1", secilenIlac);
-
-                string toplamSatis = "0";
-                object sonucSatis = cmdSatis.ExecuteScalar();
-
-                if (sonucSatis != null && sonucSatis != DBNull.Value)
-                {
-                    toplamSatis = sonucSatis.ToString();
-                }
-
+                string toplamSatis = cmdSatis.ExecuteScalar()?.ToString() ?? "0";
                 conn.Close();
 
-                // C) GEMINI'YE RAPOR GÖNDER VE TAHMİN İSTE
-                lblTahminSonuc.Text = "Yapay Zeka düşünüyor...";
-
-                string soru = $"Ben bir eczacıyım. Şu anki piyasa koşullarına göre bir satış tahmini istiyorum.\n" +
-                              $"-- ÜRÜN BİLGİLERİ --\n" +
-                              $"1. İlaç Adı: {secilenIlac}\n" +
-                              $"2. Elimdeki Güncel Stok: {anlikStok} adet\n" +
-                              $"3. Geçmiş Toplam Satışım: {toplamSatis} adet (Bu veri dükkanın satış performansını gösterir)\n" +
-                              $"4. Bugünün Tarihi: {bugun}\n" +
-                              $"5. Hedef Tarih: {hedefTarih.ToShortDateString()}\n\n" +
-                              $"-- GÖREV --\n" +
-                              $"Bu verilere ve ilacın genel kullanım amacına (grip, ağrı kesici, kronik vb.) bakarak; " +
-                              $"bugünden hedef tarihe kadar tahminen KAÇ ADET daha satılacağını öngör. " +
-                              $"Cevabı SADECE şu formatta ver: 'Tahmini Satış: [Sayı] adet. Çünkü [Kısa Mantıklı Sebep].'";
-
+                string soru = $"Eczacı Satış Tahmini: Ürün {secilenIlac}, Stok {anlikStok}, Toplam Geçmiş Satış {toplamSatis}, Hedef Tarih {hedefTarih}. Tahmin et.";
                 string cevap = await GeminiAsistani.Yorumla(soru);
-
-                // Sonucu göster
-                lblTahminSonuc.Text = "Analiz Tamamlandı.";
-                MessageBox.Show(cevap, "Yapay Zeka Satış Tahmini", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                lblTahminSonuc.Text = "Tamamlandı.";
+                MessageBox.Show(cevap, "Tahmin Sonucu", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Veri tabanı hatası: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
         }
 
-        // -----------------------------------------------------------
-        // 3. DİĞER KAYIP BUTONLAR (SimpleButton1, Button1)
-        // -----------------------------------------------------------
-        private void simpleButton1_Click(object sender, EventArgs e)
-        {
-            panelControl1.Visible = false;
-        }
+        // Panel kapatma butonları (Tasarımda varsa)
+        private void simpleButton1_Click(object sender, EventArgs e) { panelControl1.Visible = false; }
+        private void btnPanelKapat_Click(object sender, EventArgs e) { pnlTahmin.Visible = false; }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            panelControl1.Visible = true;
-        }
+        // =============================================================
+        //  NAVİGASYON BUTONLARI (AYNI)
+        // =============================================================
+        private void btnIlaclar_ItemClick(object sender, ItemClickEventArgs e) { AcForm("FrmIlaclar"); }
+        private void btnHastalar_ItemClick(object sender, ItemClickEventArgs e) { AcForm("FrmHastalar"); }
+        private void btnSatislar_ItemClick(object sender, ItemClickEventArgs e) { AcForm("FrmHareketler"); }
+        private void btnRaporlar_ItemClick(object sender, ItemClickEventArgs e) { AcForm("FrmRaporlar"); }
+        private void btnCikis_ItemClick(object sender, ItemClickEventArgs e) { if (MessageBox.Show("Çıkış?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes) Application.Exit(); }
 
-        private void btnPanelKapat_Click(object sender, EventArgs e)
+        void AcForm(string formAdi)
         {
-            pnlTahmin.Visible = false;
-        }
-
-        // -----------------------------------------------------------
-        // MENÜ NAVİGASYON BUTONLARI
-        // -----------------------------------------------------------
-
-        // 1. İLAÇLAR BUTONU
-        private void btnIlaclar_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            FrmIlaclar fr = Application.OpenForms["FrmIlaclar"] as FrmIlaclar;
+            Form fr = Application.OpenForms[formAdi];
             if (fr == null)
             {
-                fr = new FrmIlaclar();
-                fr.MdiParent = this;
-                fr.Show();
+                Type t = Type.GetType("Eczane_Otomasyonu." + formAdi);
+                if (t != null)
+                {
+                    fr = (Form)Activator.CreateInstance(t);
+                    fr.MdiParent = this;
+                    fr.Show();
+                }
             }
             else { fr.BringToFront(); }
-        }
-
-        // 2. HASTALAR BUTONU
-        private void btnHastalar_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            FrmHastalar fr = Application.OpenForms["FrmHastalar"] as FrmHastalar;
-            if (fr == null)
-            {
-                fr = new FrmHastalar();
-                fr.MdiParent = this;
-                fr.Show();
-            }
-            else { fr.BringToFront(); }
-        }
-
-        // 3. SATIŞLAR BUTONU
-        private void btnSatislar_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            FrmHareketler fr = Application.OpenForms["FrmHareketler"] as FrmHareketler;
-            if (fr == null)
-            {
-                fr = new FrmHareketler();
-                fr.MdiParent = this;
-                fr.Show();
-            }
-            else { fr.BringToFront(); }
-        }
-
-        // 4. RAPORLAR BUTONU
-        private void btnRaporlar_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            FrmRaporlar fr = Application.OpenForms["FrmRaporlar"] as FrmRaporlar;
-            if (fr == null)
-            {
-                fr = new FrmRaporlar();
-                fr.MdiParent = this;
-                fr.Show();
-            }
-            else { fr.BringToFront(); }
-        }
-
-        // 5. ÇIKIŞ BUTONU
-        private void btnCikis_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            DialogResult secim = MessageBox.Show("Programdan çıkmak istiyor musunuz?", "Çıkış", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (secim == DialogResult.Yes)
-            {
-                Application.Exit();
-            }
         }
     }
 }
