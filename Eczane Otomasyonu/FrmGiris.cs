@@ -67,6 +67,21 @@ namespace Eczane_Otomasyonu
 
                 if (dr.Read())
                 {
+                    // --- BURASI ÇOK ÖNEMLİ: KULLANICI ID'SİNİ ALIYORUZ 🔑 ---
+                    // Artık program bu ID'yi hafızada tutacak ve diğer formlarda
+                    // sadece bu ID'ye ait verileri gösterecek.
+
+                    // Not: Veritabanındaki ID kolonunun adının "ID" olduğunu varsayıyorum. 
+                    // Eğer kolon adı farklıysa (örn: KULLANICIID) parantez içini ona göre değiştir.
+                    if (dr["ID"] != DBNull.Value)
+                    {
+                        MevcutKullanici.Id = Convert.ToInt32(dr["ID"]);
+                    }
+
+                    // Kullanıcı adını da tutalım, belki ekranda "Hoşgeldin Yusuf" yazarız.
+                    MevcutKullanici.KullaniciAdi = dr["KULLANICIADI"].ToString();
+                    // -----------------------------------------------------------
+
                     // Giriş Başarılı -> Ana Modülü Aç
                     FrmAnaModul fr = new FrmAnaModul();
                     fr.Show();
@@ -125,6 +140,7 @@ namespace Eczane_Otomasyonu
                 // D) Veritabanına Kayıt
                 SqlConnection conn = bgl.baglanti();
 
+                // Not: ID kolonu otomatik artan (Identity) olduğu için Insert sorgusuna yazılmaz.
                 SqlCommand komut = new SqlCommand("INSERT INTO TBL_KULLANICILAR (KULLANICIADI, SIFRE, TELEFON, MAIL) VALUES (@p1, @p2, @p3, @p4)", conn);
                 komut.Parameters.AddWithValue("@p1", txtKadi_Kayit.Text);
                 komut.Parameters.AddWithValue("@p2", txtSifre_Kayit.Text);

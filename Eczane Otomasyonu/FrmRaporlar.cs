@@ -42,44 +42,52 @@ namespace Eczane_Otomasyonu
             KartBilgileriniGetir(t1, t2);
         }
 
-        // --- 1. KPI KARTLARI (ÖZET BİLGİLER) ---
+        // --- 1. KPI KARTLARI (ÖZET BİLGİLER - SADECE BENİM VERİLERİM) ---
         void KartBilgileriniGetir(string t1, string t2)
         {
             SqlConnection conn = bgl.baglanti();
             try
             {
-                // A) Toplam Ciro
-                SqlCommand cmdCiro = new SqlCommand("SELECT SUM(toplamFiyat) FROM Hareketler WHERE tarih BETWEEN @p1 AND @p2", conn);
+                // A) Toplam Ciro (Tarih + Kullanıcı Filtresi)
+                SqlCommand cmdCiro = new SqlCommand("SELECT SUM(toplamFiyat) FROM Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid", conn);
                 cmdCiro.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
                 cmdCiro.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                cmdCiro.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
                 object ciroSonuc = cmdCiro.ExecuteScalar();
                 lblToplamCiro.Text = (ciroSonuc != DBNull.Value) ? string.Format("{0:C2}", ciroSonuc) : "0,00 ₺";
 
-                // B) Toplam Hasta
-                SqlCommand cmdHasta = new SqlCommand("SELECT COUNT(DISTINCT tcNo) FROM Hareketler WHERE tarih BETWEEN @p1 AND @p2", conn);
+                // B) Toplam Hasta (Tarih + Kullanıcı Filtresi)
+                SqlCommand cmdHasta = new SqlCommand("SELECT COUNT(DISTINCT tcNo) FROM Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid", conn);
                 cmdHasta.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
                 cmdHasta.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                cmdHasta.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
                 object hastaSonuc = cmdHasta.ExecuteScalar();
                 lblToplamHasta.Text = (hastaSonuc != null) ? hastaSonuc.ToString() + " Kişi" : "0 Kişi";
 
-                // C) Toplam Stok
-                SqlCommand cmdStok = new SqlCommand("SELECT SUM(adet) FROM Ilaclar", conn);
+                // C) Toplam Stok (Sadece Benim Stoğum)
+                SqlCommand cmdStok = new SqlCommand("SELECT SUM(adet) FROM Ilaclar WHERE KullaniciID=@uid", conn);
+                cmdStok.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
                 object stokSonuc = cmdStok.ExecuteScalar();
-                lblToplamStok.Text = (stokSonuc != null) ? stokSonuc.ToString() + " Kutu" : "0 Kutu";
+                lblToplamStok.Text = (stokSonuc != null && stokSonuc != DBNull.Value) ? stokSonuc.ToString() + " Kutu" : "0 Kutu";
             }
             catch (Exception ex) { MessageBox.Show("Kart Bilgisi Hatası: " + ex.Message); }
             finally { conn.Close(); }
         }
 
-        // --- 2. GRAFİK VERİLERİ ---
+        // --- 2. GRAFİK VERİLERİ (KULLANICI BAZLI) ---
         void enCokSatanlar(string t1, string t2)
         {
             SqlConnection conn = bgl.baglanti();
             try
             {
-                SqlCommand komut = new SqlCommand("Select Top 5 ilacAdi, SUM(adet) from Hareketler WHERE (ilacAdi IS NOT NULL AND ilacAdi <> '') AND (tarih BETWEEN @p1 AND @p2) group by ilacAdi order by SUM(adet) desc", conn);
+                // Kullanıcı ID şartı eklendi
+                SqlCommand komut = new SqlCommand("Select Top 5 ilacAdi, SUM(adet) from Hareketler WHERE (ilacAdi IS NOT NULL AND ilacAdi <> '') AND (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid group by ilacAdi order by SUM(adet) desc", conn);
                 komut.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
                 komut.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 SqlDataReader dr = komut.ExecuteReader();
 
@@ -101,9 +109,11 @@ namespace Eczane_Otomasyonu
             SqlConnection conn = bgl.baglanti();
             try
             {
-                SqlCommand komut = new SqlCommand("Select FORMAT(tarih, 'dd.MM.yyyy'), SUM(toplamFiyat) from Hareketler WHERE tarih BETWEEN @p1 AND @p2 group by FORMAT(tarih, 'dd.MM.yyyy') ORDER BY MIN(tarih)", conn);
+                // Kullanıcı ID şartı eklendi
+                SqlCommand komut = new SqlCommand("Select FORMAT(tarih, 'dd.MM.yyyy'), SUM(toplamFiyat) from Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid group by FORMAT(tarih, 'dd.MM.yyyy') ORDER BY MIN(tarih)", conn);
                 komut.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
                 komut.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 SqlDataReader dr = komut.ExecuteReader();
 
@@ -147,7 +157,7 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // --- GÖRSEL AYARLAR ---
+        // --- GÖRSEL AYARLAR (AYNI KALDI) ---
         void GrafikGorselAyarlari()
         {
             chartIlaclar.PaletteName = "Office 2013";
@@ -169,8 +179,7 @@ namespace Eczane_Otomasyonu
                 diyagram.AxisY.Label.TextPattern = "{V:C2}";
                 diyagram.AxisY.GridLines.Color = Color.LightGray;
 
-                // --- İŞTE DÜZELTİLEN SATIR BURASI ---
-                // System.Drawing... yerine DevExpress.XtraCharts... kullanıyoruz.
+                // --- Hata Düzeltmesi (Önceki adımda yaptığımız) ---
                 diyagram.AxisY.GridLines.LineStyle.DashStyle = DevExpress.XtraCharts.DashStyle.Dash;
             }
 

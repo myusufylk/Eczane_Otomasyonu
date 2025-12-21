@@ -216,6 +216,7 @@
     <Compile Include="MesajAraci.Designer.cs">
       <DependentUpon>MesajAraci.cs</DependentUpon>
     </Compile>
+    <Compile Include="MevcutKullanici.cs" />
     <Compile Include="ModelOlusturucu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

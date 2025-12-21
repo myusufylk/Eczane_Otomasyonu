@@ -53,6 +53,8 @@ namespace Eczane_Otomasyonu
             this.btnŞfrUnuttum = new DevExpress.XtraEditors.SimpleButton();
             this.btnKayıtOl = new DevExpress.XtraEditors.SimpleButton();
             this.behaviorManager1 = new DevExpress.Utils.Behaviors.BehaviorManager(this.components);
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAd.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlKayit)).BeginInit();
@@ -120,13 +122,14 @@ namespace Eczane_Otomasyonu
             // 
             // pnlKayit
             // 
+            this.pnlKayit.Controls.Add(this.label2);
             this.pnlKayit.Controls.Add(this.btnGeri_Kayit);
             this.pnlKayit.Controls.Add(this.txtKadi_Kayit);
             this.pnlKayit.Controls.Add(this.btnKaydet);
             this.pnlKayit.Controls.Add(this.txtMail_Kayit);
             this.pnlKayit.Controls.Add(this.txtTel_Kayit);
             this.pnlKayit.Controls.Add(this.txtSifre_Kayit);
-            this.pnlKayit.Location = new System.Drawing.Point(0, 0);
+            this.pnlKayit.Location = new System.Drawing.Point(239, 138);
             this.pnlKayit.Name = "pnlKayit";
             this.pnlKayit.Size = new System.Drawing.Size(240, 300);
             this.pnlKayit.TabIndex = 6;
@@ -210,14 +213,14 @@ namespace Eczane_Otomasyonu
             // 
             // pnlSifreUnuttum
             // 
+            this.pnlSifreUnuttum.Controls.Add(this.label1);
             this.pnlSifreUnuttum.Controls.Add(this.txtYeniSifre);
             this.pnlSifreUnuttum.Controls.Add(this.txtMail_Unuttum);
             this.pnlSifreUnuttum.Controls.Add(this.txtTel_Unuttum);
-            this.pnlSifreUnuttum.Controls.Add(this.pnlKayit);
             this.pnlSifreUnuttum.Controls.Add(this.txtKAdı_Unuttum);
             this.pnlSifreUnuttum.Controls.Add(this.btnGeri_Unuttum);
             this.pnlSifreUnuttum.Controls.Add(this.btnGuncelle);
-            this.pnlSifreUnuttum.Location = new System.Drawing.Point(257, 116);
+            this.pnlSifreUnuttum.Location = new System.Drawing.Point(239, 138);
             this.pnlSifreUnuttum.Name = "pnlSifreUnuttum";
             this.pnlSifreUnuttum.Size = new System.Drawing.Size(240, 300);
             this.pnlSifreUnuttum.TabIndex = 7;
@@ -327,6 +330,26 @@ namespace Eczane_Otomasyonu
             this.btnKayıtOl.Text = "KAYIT OL ";
             this.btnKayıtOl.Click += new System.EventHandler(this.lnkKayitOl_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label1.Location = new System.Drawing.Point(66, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(156, 21);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "ŞİFREMİ UNUTTUM";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label2.Location = new System.Drawing.Point(61, 5);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(79, 21);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "KAYIT OL";
+            // 
             // FrmGiris
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
@@ -336,6 +359,7 @@ namespace Eczane_Otomasyonu
             this.Controls.Add(this.btnKayıtOl);
             this.Controls.Add(this.btnŞfrUnuttum);
             this.Controls.Add(this.pnlSifreUnuttum);
+            this.Controls.Add(this.pnlKayit);
             this.Controls.Add(this.btnKapat);
             this.Controls.Add(this.btnGiris);
             this.Controls.Add(this.txtSifre);
@@ -351,12 +375,14 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlKayit)).EndInit();
             this.pnlKayit.ResumeLayout(false);
+            this.pnlKayit.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtKadi_Kayit.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtMail_Kayit.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTel_Kayit.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSifre_Kayit.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlSifreUnuttum)).EndInit();
             this.pnlSifreUnuttum.ResumeLayout(false);
+            this.pnlSifreUnuttum.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtYeniSifre.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtMail_Unuttum.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTel_Unuttum.Properties)).EndInit();
@@ -389,5 +415,7 @@ namespace Eczane_Otomasyonu
         private TextEdit txtTel_Kayit;
         private DevExpress.Utils.Behaviors.BehaviorManager behaviorManager1;
         private SimpleButton btnGeri_Kayit;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
     }
 }

@@ -67,7 +67,7 @@ namespace Eczane_Otomasyonu
             gridView1.OptionsBehavior.Editable = false;
         }
 
-        // --- ANA MODÜLE ERİŞİM METODU (EKSİKTİ, EKLENDİ) ---
+        // --- ANA MODÜLE ERİŞİM METODU ---
         private FrmAnaModul AnaModuluBul()
         {
             if (this.MdiParent is FrmAnaModul)
@@ -77,11 +77,12 @@ namespace Eczane_Otomasyonu
             return (FrmAnaModul)Application.OpenForms["FrmAnaModul"];
         }
 
-        // --- LİSTELEME VE VERİ ÇEKME ---
+        // --- LİSTELEME VE VERİ ÇEKME (SADECE BENİM VERİLERİM) ---
         void listele()
         {
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter("Select * From Hareketler ORDER BY tarih DESC", bgl.baglanti());
+            // Sadece giriş yapan kullanıcının hareketlerini getir
+            SqlDataAdapter da = new SqlDataAdapter("Select * From Hareketler WHERE KullaniciID=" + MevcutKullanici.Id + " ORDER BY tarih DESC", bgl.baglanti());
             da.Fill(dt);
             gridControl1.DataSource = dt;
             gridView1.BestFitColumns();
@@ -90,7 +91,8 @@ namespace Eczane_Otomasyonu
         void ilacListesiGetir()
         {
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat From Ilaclar", bgl.baglanti());
+            // Sadece benim ilaçlarım listelensin
+            SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
             da.Fill(dt);
             lueIlac.Properties.DataSource = dt;
             lueIlac.Properties.ValueMember = "ilacAdı";
@@ -137,8 +139,11 @@ namespace Eczane_Otomasyonu
             {
                 try
                 {
-                    SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1", bgl.baglanti());
+                    // Hasta sorgularken sadece benim hastalarıma bak
+                    SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1 AND KullaniciID=@uid", bgl.baglanti());
                     komut.Parameters.AddWithValue("@p1", txtTc.Text);
+                    komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
                     SqlDataReader dr = komut.ExecuteReader();
 
                     if (dr.Read())
@@ -187,7 +192,7 @@ namespace Eczane_Otomasyonu
             onizleme.ShowDialog();
         }
 
-        // --- YENİLENMİŞ PROFESYONEL FİŞ TASARIMI 🧾 ---
+        // --- YENİLENMİŞ PROFESYONEL FİŞ TASARIMI (BENİM İŞLETME BİLGİLERİM) ---
         private void FisTasarimi(object sender, PrintPageEventArgs e)
         {
             // 1. Veritabanından İşletme Bilgilerini Çek
@@ -199,8 +204,8 @@ namespace Eczane_Otomasyonu
             try
             {
                 SqlConnection conn = bgl.baglanti();
-                // Sadece 1 kayıt olduğu için top 1 yeterli
-                SqlCommand komut = new SqlCommand("Select top 1 * From Isletme", conn);
+                // Sadece benim işletme bilgilerimi getir
+                SqlCommand komut = new SqlCommand("Select top 1 * From Isletme WHERE KullaniciID=" + MevcutKullanici.Id, conn);
                 SqlDataReader dr = komut.ExecuteReader();
                 if (dr.Read())
                 {
@@ -236,18 +241,16 @@ namespace Eczane_Otomasyonu
             if (!string.IsNullOrEmpty(logoYolu) && System.IO.File.Exists(logoYolu))
             {
                 Image img = Image.FromFile(logoYolu);
-                // Resmi sayfanın ortasına yerleştir (Genişlik 100, Yükseklik 80)
                 int resimX = (int)((sayfaGenislik - 100) / 2);
                 e.Graphics.DrawImage(img, resimX, y, 100, 80);
-                y += 90; // Resimden sonra aşağı in
+                y += 90;
             }
 
-            // B) BAŞLIK (ECZANE ADI) - ORTALI
+            // B) BAŞLIK (ECZANE ADI)
             e.Graphics.DrawString(eczaneAdi, baslikFont, firca, new RectangleF(0, y, sayfaGenislik, 30), ortali);
             y += 35;
 
-            // C) ADRES VE TELEFON - ORTALI
-            // Adres çok uzunsa sığması için RectangleF kullanıyoruz
+            // C) ADRES VE TELEFON
             e.Graphics.DrawString(adres, bilgiFont, firca, new RectangleF(0, y, sayfaGenislik, 40), ortali);
             y += 40;
             e.Graphics.DrawString(telefon, bilgiFont, firca, new RectangleF(0, y, sayfaGenislik, 20), ortali);
@@ -257,7 +260,7 @@ namespace Eczane_Otomasyonu
             e.Graphics.DrawString("----------------------------------------------------------------", icerikFont, firca, new RectangleF(0, y, sayfaGenislik, 20), ortali);
             y += 20;
 
-            // E) SATIŞ BİLGİLERİ (SOLA YASLI)
+            // E) SATIŞ BİLGİLERİ
             int solBosluk = 40;
             e.Graphics.DrawString($"Tarih: {DateTime.Now.ToString("dd.MM.yyyy HH:mm")}", icerikFont, firca, solBosluk, y);
             y += satirAraligi;
@@ -268,7 +271,6 @@ namespace Eczane_Otomasyonu
 
             // F) ÜRÜN DETAYLARI
             e.Graphics.DrawString("Ürün", altBaslikFont, firca, solBosluk, y);
-            // Tutarı sağa yaslamak için basit hesap
             e.Graphics.DrawString("Tutar", altBaslikFont, firca, sayfaGenislik - 150, y);
             y += satirAraligi;
 
@@ -289,7 +291,7 @@ namespace Eczane_Otomasyonu
             e.Graphics.DrawString("Sağlıklı günler dileriz...", bilgiFont, firca, new RectangleF(0, y, sayfaGenislik, 20), ortali);
         }
 
-        // --- SATIŞ YAP BUTONU (ANA İŞLEM) ---
+        // --- SATIŞ YAP BUTONU (ANA İŞLEM - KULLANICI BAZLI) ---
         private async void btnSatisYap_Click(object sender, EventArgs e)
         {
             // 1. KİLİT KONTROLÜ
@@ -315,9 +317,10 @@ namespace Eczane_Otomasyonu
 
                 try
                 {
-                    // 1. STOK KONTROLÜ
-                    SqlCommand cmdStok = new SqlCommand("Select adet From Ilaclar where ilacAdı=@p1", conn);
+                    // 1. STOK KONTROLÜ (Sadece benim stoğum)
+                    SqlCommand cmdStok = new SqlCommand("Select adet From Ilaclar where ilacAdı=@p1 AND KullaniciID=@uid", conn);
                     cmdStok.Parameters.AddWithValue("@p1", lueIlac.Text);
+                    cmdStok.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     object stokObj = cmdStok.ExecuteScalar();
                     int mevcutStok = (stokObj != null) ? Convert.ToInt32(stokObj) : 0;
 
@@ -328,9 +331,10 @@ namespace Eczane_Otomasyonu
                         return;
                     }
 
-                    // 2. HASTA KAYIT İŞLEMİ
-                    SqlCommand cmdHasta = new SqlCommand("Select count(*) From Hastalar where TC=@p1", conn);
+                    // 2. HASTA KAYIT İŞLEMİ (Benim hastalarım)
+                    SqlCommand cmdHasta = new SqlCommand("Select count(*) From Hastalar where TC=@p1 AND KullaniciID=@uid", conn);
                     cmdHasta.Parameters.AddWithValue("@p1", txtTc.Text);
+                    cmdHasta.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     int hastaSayisi = Convert.ToInt32(cmdHasta.ExecuteScalar());
 
                     if (hastaSayisi == 0)
@@ -347,39 +351,43 @@ namespace Eczane_Otomasyonu
                         }
                         else { ad = tamIsim; }
 
-                        SqlCommand cmdEkle = new SqlCommand("Insert into Hastalar (TC, Ad, Soyad) values (@p1, @p2, @p3)", conn);
+                        SqlCommand cmdEkle = new SqlCommand("Insert into Hastalar (TC, Ad, Soyad, KullaniciID) values (@p1, @p2, @p3, @uid)", conn);
                         cmdEkle.Parameters.AddWithValue("@p1", txtTc.Text);
                         cmdEkle.Parameters.AddWithValue("@p2", ad);
                         cmdEkle.Parameters.AddWithValue("@p3", soyad);
+                        cmdEkle.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                         cmdEkle.ExecuteNonQuery();
                     }
 
-                    // 3. STOKTAN DÜŞME
-                    SqlCommand cmdDus = new SqlCommand("Update Ilaclar set adet=adet-@p1 where ilacAdı=@p2", conn);
+                    // 3. STOKTAN DÜŞME (Benim stoğumdan düş)
+                    SqlCommand cmdDus = new SqlCommand("Update Ilaclar set adet=adet-@p1 where ilacAdı=@p2 AND KullaniciID=@uid", conn);
                     cmdDus.Parameters.AddWithValue("@p1", satilanAdet);
                     cmdDus.Parameters.AddWithValue("@p2", lueIlac.Text);
+                    cmdDus.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     cmdDus.ExecuteNonQuery();
 
-                    // 4. HAREKET KAYDI
-                    SqlCommand cmdHareket = new SqlCommand("Insert into Hareketler (ilacAdi, adet, toplamFiyat, tarih, hastaAdi, tcNo) values (@p1,@p2,@p3,@p4,@p5,@p6)", conn);
+                    // 4. HAREKET KAYDI (Benim hareketlerime ekle)
+                    SqlCommand cmdHareket = new SqlCommand("Insert into Hareketler (ilacAdi, adet, toplamFiyat, tarih, hastaAdi, tcNo, KullaniciID) values (@p1,@p2,@p3,@p4,@p5,@p6,@uid)", conn);
                     cmdHareket.Parameters.AddWithValue("@p1", lueIlac.Text);
                     cmdHareket.Parameters.AddWithValue("@p2", satilanAdet);
                     cmdHareket.Parameters.AddWithValue("@p3", toplamTutar);
                     cmdHareket.Parameters.AddWithValue("@p4", dateTarih.DateTime);
                     cmdHareket.Parameters.AddWithValue("@p5", txtHastaAdi.Text);
                     cmdHareket.Parameters.AddWithValue("@p6", txtTc.Text);
+                    cmdHareket.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     cmdHareket.ExecuteNonQuery();
 
-                    // 5. SADAKAT KONTROLÜ
-                    SqlCommand cmdSayi = new SqlCommand("Select count(*) From Hareketler where tcNo=@p1", conn);
+                    // 5. SADAKAT KONTROLÜ (Benim satış sayım)
+                    SqlCommand cmdSayi = new SqlCommand("Select count(*) From Hareketler where tcNo=@p1 AND KullaniciID=@uid", conn);
                     cmdSayi.Parameters.AddWithValue("@p1", txtTc.Text);
+                    cmdSayi.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     int alisverisSayisi = Convert.ToInt32(cmdSayi.ExecuteScalar());
 
                     conn.Close();
 
                     // BİLGİ VE FİŞ
                     MessageBox.Show("Satış Başarıyla Tamamlandı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    FisYazdir(); // Yeni tasarım burada çalışacak
+                    FisYazdir();
 
                     // 6. ANA MODÜL BİLDİRİM & GEMINI
                     FrmAnaModul anaForm = AnaModuluBul();

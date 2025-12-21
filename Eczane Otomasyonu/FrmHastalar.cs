@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows.Forms;
 using System.Data.SqlClient;
-using DevExpress.XtraGrid.Views.Grid; // Grid işlemleri için şart
+using DevExpress.XtraGrid.Views.Grid;
 
 namespace Eczane_Otomasyonu
 {
@@ -17,6 +17,15 @@ namespace Eczane_Otomasyonu
             // --- MANUEL BAĞLANTILAR (Garanti Yöntem) ---
             this.Load += FrmHastalar_Load;
             gridView1.RowClick += gridView1_RowClick;
+
+            // Buton tıklama olaylarını da bağlayalım (Eğer tasarımda bağlı değilse)
+            try
+            {
+                this.Controls.Find("btnKaydet", true)[0].Click += btnKaydet_Click;
+                this.Controls.Find("btnSil", true)[0].Click += btnSil_Click;
+                this.Controls.Find("btnGuncelle", true)[0].Click += btnGuncelle_Click;
+            }
+            catch { }
         }
 
         // --- FORM YÜKLENİRKEN ---
@@ -43,10 +52,12 @@ namespace Eczane_Otomasyonu
             cmbGuvence.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
         }
 
+        // --- LİSTELEME (SADECE BENİM HASTALARIM) ---
         void listele()
         {
             DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter("Select * From Hastalar", bgl.baglanti());
+            // SADECE GİRİŞ YAPAN KULLANICININ HASTALARINI ÇEK
+            SqlDataAdapter da = new SqlDataAdapter("Select * From Hastalar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
             da.Fill(dt);
             gridControl1.DataSource = dt;
         }
@@ -67,35 +78,41 @@ namespace Eczane_Otomasyonu
             DataRow dr = gridView1.GetDataRow(e.RowHandle);
             if (dr != null)
             {
-                // Veritabanı Sırası: 0:ID, 1:TC, 2:Ad, 3:Soyad, 4:Telefon, 5:Guvence, 6:Adres
-
-                // ID kutusu kullanmıyoruz, direkt TC'den başlıyoruz
-                txtTc.Text = dr[1].ToString();
-                txtAd.Text = dr[2].ToString();      // Ad Ayrı
-                txtSoyad.Text = dr[3].ToString();   // Soyad Ayrı
-                txtTelefon.Text = dr[4].ToString();
-                cmbGuvence.Text = dr[5].ToString();
-                txtAdres.Text = dr[6].ToString();
+                // Veritabanı sütun isimlerine göre çekmek daha güvenlidir
+                // (Index yerine ["KolonAdi"] kullanmak sütun sırası değişse bile çalışır)
+                try
+                {
+                    txtTc.Text = dr["TC"].ToString();
+                    txtAd.Text = dr["Ad"].ToString();
+                    txtSoyad.Text = dr["Soyad"].ToString();
+                    txtTelefon.Text = dr["Telefon"].ToString();
+                    cmbGuvence.Text = dr["Guvence"].ToString();
+                    txtAdres.Text = dr["Adres"].ToString();
+                }
+                catch { }
             }
         }
 
-        // --- KAYDET (Ad ve Soyad Ayrı) ---
+        // --- KAYDET (BENİM ID'MLE KAYDET) ---
         private void btnKaydet_Click(object sender, EventArgs e)
         {
             try
             {
-                // SQL Sorgusu Ad ve Soyad sütunlarına göre güncellendi
-                SqlCommand komut = new SqlCommand("insert into Hastalar (TC, Ad, Soyad, Telefon, Guvence, Adres) values (@p1, @p2, @p3, @p4, @p5, @p6)", bgl.baglanti());
+                SqlConnection conn = bgl.baglanti();
+
+                // KullaniciID sütununa da ekleme yapıyoruz
+                SqlCommand komut = new SqlCommand("insert into Hastalar (TC, Ad, Soyad, Telefon, Guvence, Adres, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @p6, @uid)", conn);
 
                 komut.Parameters.AddWithValue("@p1", txtTc.Text);
-                komut.Parameters.AddWithValue("@p2", txtAd.Text);    // Ad
-                komut.Parameters.AddWithValue("@p3", txtSoyad.Text); // Soyad
+                komut.Parameters.AddWithValue("@p2", txtAd.Text);
+                komut.Parameters.AddWithValue("@p3", txtSoyad.Text);
                 komut.Parameters.AddWithValue("@p4", txtTelefon.Text);
                 komut.Parameters.AddWithValue("@p5", cmbGuvence.Text);
                 komut.Parameters.AddWithValue("@p6", txtAdres.Text);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); // <-- BENİM ID'M
 
                 komut.ExecuteNonQuery();
-                bgl.baglanti().Close();
+                conn.Close();
 
                 MessageBox.Show("Hasta Kaydedildi", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 listele();
@@ -104,7 +121,7 @@ namespace Eczane_Otomasyonu
             catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
         }
 
-        // --- SİL (ID'ye göre silmek en güvenlisidir, kullanıcı görmese bile arka planda kullanırız) ---
+        // --- SİL (SADECE BENİM HASTAMI SİL) ---
         private void btnSil_Click(object sender, EventArgs e)
         {
             DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
@@ -114,40 +131,44 @@ namespace Eczane_Otomasyonu
                 return;
             }
 
-            // Grid'deki gizli ID değerini alıyoruz (Index 0)
-            string id = dr[0].ToString();
+            string id = dr["ID"].ToString(); // ID kolonu
 
             if (MessageBox.Show("Hasta kaydını silmek istiyor musunuz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                SqlCommand komut = new SqlCommand("Delete From Hastalar where ID=@p1", bgl.baglanti());
+                SqlConnection conn = bgl.baglanti();
+                // Güvenlik: Sadece ID yetmez, KullaniciID de tutmalı (Başkası benim verimi silemesin)
+                SqlCommand komut = new SqlCommand("Delete From Hastalar where ID=@p1 AND KullaniciID=@uid", conn);
                 komut.Parameters.AddWithValue("@p1", id);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
                 komut.ExecuteNonQuery();
-                bgl.baglanti().Close();
+                conn.Close();
+
                 listele();
                 temizle();
             }
         }
 
-        // --- GÜNCELLE (TC'ye Göre - ID Kullanmadan) ---
+        // --- GÜNCELLE (SADECE BENİM HASTAMI GÜNCELLE) ---
         private void btnGuncelle_Click(object sender, EventArgs e)
         {
-            // Senin istediğin özel mantık: TC kimliğe göre bulup diğer bilgileri güncelliyor.
+            SqlConnection conn = bgl.baglanti();
 
-            SqlCommand komut = new SqlCommand("Update Hastalar set Ad=@p1, Soyad=@p2, Telefon=@p3, Guvence=@p4, Adres=@p5 where TC=@p6", bgl.baglanti());
+            // Güncelleme şartına KullaniciID ekliyoruz
+            SqlCommand komut = new SqlCommand("Update Hastalar set Ad=@p1, Soyad=@p2, Telefon=@p3, Guvence=@p4, Adres=@p5 where TC=@p6 AND KullaniciID=@uid", conn);
 
-            komut.Parameters.AddWithValue("@p1", txtAd.Text);       // Ad
-            komut.Parameters.AddWithValue("@p2", txtSoyad.Text);    // Soyad
-            komut.Parameters.AddWithValue("@p3", txtTelefon.Text);  // Telefon
-            komut.Parameters.AddWithValue("@p4", cmbGuvence.Text);  // Guvence
-            komut.Parameters.AddWithValue("@p5", txtAdres.Text);    // Adres
-
-            // Koşul (Where)
-            komut.Parameters.AddWithValue("@p6", txtTc.Text);       // TC Kimlik No
+            komut.Parameters.AddWithValue("@p1", txtAd.Text);
+            komut.Parameters.AddWithValue("@p2", txtSoyad.Text);
+            komut.Parameters.AddWithValue("@p3", txtTelefon.Text);
+            komut.Parameters.AddWithValue("@p4", cmbGuvence.Text);
+            komut.Parameters.AddWithValue("@p5", txtAdres.Text);
+            komut.Parameters.AddWithValue("@p6", txtTc.Text);
+            komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); // <-- GÜVENLİK
 
             try
             {
-                int sonuc = komut.ExecuteNonQuery(); // Etkilenen satır sayısı
-                bgl.baglanti().Close();
+                int sonuc = komut.ExecuteNonQuery();
+                conn.Close();
 
                 if (sonuc > 0)
                 {
@@ -155,7 +176,7 @@ namespace Eczane_Otomasyonu
                 }
                 else
                 {
-                    MessageBox.Show("Bu TC Kimlik Numarasına ait kayıt bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Bu TC Kimlik Numarasına ait kayıt bulunamadı (veya size ait değil)!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 listele();
@@ -164,7 +185,7 @@ namespace Eczane_Otomasyonu
             catch (Exception ex)
             {
                 MessageBox.Show("Güncelleme Hatası: " + ex.Message);
-                bgl.baglanti().Close();
+                conn.Close();
             }
         }
     }

@@ -1,24 +1,58 @@
 ﻿using System;
 using System.Data;
-using System.Drawing; // Resim için şart
+using System.Drawing;
 using System.Windows.Forms;
 using System.Data.SqlClient;
-using System.IO; // Dosya işlemleri için şart
+using System.IO;
 
 namespace Eczane_Otomasyonu
 {
     public partial class FrmIlaclar : DevExpress.XtraEditors.XtraForm
     {
         SqlBaglantisi bgl = new SqlBaglantisi();
-
-        // Resim yolunu hafızada tutmak için değişken
         public string resimDosyaYolu = "";
+        bool islemYapiliyor = false;
 
         public FrmIlaclar()
         {
             InitializeComponent();
-            // Tıklama olayını garantiye alıyoruz
-            gridView1.RowClick += gridView1_RowClick;
+
+            // --- 🛠️ GÖRÜNÜM AYARLARI (TAM KAPLAMA) ---
+
+            // 1. Tabloyu formun içine tam oturt
+            gridControl1.Dock = DockStyle.Fill;
+
+            // 2. BURASI DEĞİŞTİ: Sütunlar ekranı tamamen doldursun (Sağda boşluk kalmasın)
+            gridView1.OptionsView.ColumnAutoWidth = true;
+
+            // 3. Kaydırma çubukları otomatik (Sığmazsa çıkar, sığarsa çıkmaz)
+            gridView1.HorzScrollVisibility = DevExpress.XtraGrid.Views.Base.ScrollVisibility.Auto;
+            gridView1.VertScrollVisibility = DevExpress.XtraGrid.Views.Base.ScrollVisibility.Auto;
+
+            // ------------------------------------------------
+
+            // Olayları Bağla
+            try
+            {
+                gridView1.RowClick -= gridView1_RowClick;
+                gridView1.RowClick += gridView1_RowClick;
+
+                Bagla("btnKaydet", btnKaydet_Click);
+                Bagla("btnSil", btnSil_Click);
+                Bagla("btnGuncelle", btnGuncelle_Click);
+                Bagla("btnResimSec", btnResimSec_Click);
+            }
+            catch { }
+        }
+
+        void Bagla(string butonAdi, EventHandler olay)
+        {
+            var btn = this.Controls.Find(butonAdi, true);
+            if (btn.Length > 0)
+            {
+                btn[0].Click -= olay;
+                btn[0].Click += olay;
+            }
         }
 
         private void FrmIlaclar_Load(object sender, EventArgs e)
@@ -30,10 +64,38 @@ namespace Eczane_Otomasyonu
 
         void listele()
         {
-            DataTable dt = new DataTable();
-            SqlDataAdapter da = new SqlDataAdapter("Select siraNo, ilacKodu, ilacAdı, fiyat, adet, resim From Ilaclar", bgl.baglanti());
-            da.Fill(dt);
-            gridControl1.DataSource = dt;
+            try
+            {
+                DataTable dt = new DataTable();
+                SqlDataAdapter da = new SqlDataAdapter("Select siraNo, ilacKodu, ilacAdı, fiyat, adet, resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
+                da.Fill(dt);
+                gridControl1.DataSource = dt;
+
+                // --- 🛠️ ÇÖZÜM BURASI ---
+                // Grid'deki sütunları veritabanına göre sıfırlayıp tekrar oluşturur.
+                // Böylece "siraNo" ismi eşleşmeme sorunu ortadan kalkar.
+                gridView1.PopulateColumns();
+
+                // --- GÖRÜNÜM AYARLARI ---
+                gridView1.OptionsView.ColumnAutoWidth = true; // Ekrana yayıl
+                gridView1.BestFitColumns(); // İçeriğe göre genişle
+
+                // Başlıkları Güzelleştir (İsteğe Bağlı)
+                gridView1.Columns["siraNo"].Caption = "SIRA NO";
+                gridView1.Columns["ilacKodu"].Caption = "İLAÇ KODU";
+                gridView1.Columns["ilacAdı"].Caption = "İLAÇ ADI";
+                gridView1.Columns["fiyat"].Caption = "FİYAT";
+                gridView1.Columns["adet"].Caption = "ADET";
+
+                // Resim yolu sütununu gizlemek istersen (Gerek yoksa):
+                // gridView1.Columns["resim"].Visible = false;
+            }
+            catch { }
+        }
+
+        void AnaModuluGuncelle()
+        {
+            try { if (this.MdiParent is FrmAnaModul anaModul) anaModul.ListeleriYenile(); } catch { }
         }
 
         void temizle()
@@ -47,188 +109,186 @@ namespace Eczane_Otomasyonu
             resimDosyaYolu = "";
         }
 
-        // --- YARDIMCI METOT: RESMİ EKRANA BASAN FONKSİYON ---
         void resimYukle(string yol)
         {
-            // Eğer yol boş değilse ve dosya gerçekten bilgisayarda varsa
-            if (!string.IsNullOrEmpty(yol) && File.Exists(yol))
-            {
-                picResim.Image = Image.FromFile(yol);
-                resimDosyaYolu = yol;
-            }
-            else
-            {
-                picResim.Image = null; // Resim yoksa kutuyu boşalt
-                resimDosyaYolu = "";
-            }
+            if (!string.IsNullOrEmpty(yol) && File.Exists(yol)) { picResim.Image = Image.FromFile(yol); resimDosyaYolu = yol; }
+            else { picResim.Image = null; resimDosyaYolu = ""; }
         }
 
-        // --- 1. İLAÇ KODU GİRİLİNCE (Leave Olayı) ---
-        private void txtKod_Leave(object sender, EventArgs e)
+       
+        private void txtAd_Leave(object sender, EventArgs e) { if (txtAd.Text.Trim() != "" && txtKod.Text == "") VeriGetir("ilacAdı", txtAd.Text.Trim()); }
+
+        void VeriGetir(string kolon, string deger)
         {
-            if (txtKod.Text.Trim() == "") return;
-
-            SqlCommand komut = new SqlCommand("Select * From Ilaclar where ilacKodu=@p1", bgl.baglanti());
-            komut.Parameters.AddWithValue("@p1", txtKod.Text.Trim());
-            SqlDataReader dr = komut.ExecuteReader();
-
-            if (dr.Read())
-            {
-                // Kod girildi, diğer bilgileri getir
-                txtAd.Text = dr["ilacAdı"].ToString();
-                txtFiyat.Text = dr["fiyat"].ToString();
-
-                // Resmi getir
-                resimYukle(dr["resim"].ToString());
-            }
-            bgl.baglanti().Close();
-        }
-
-        // --- 2. İLAÇ ADI GİRİLİNCE (Leave Olayı) - YENİ ÖZELLİK ---
-        private void txtAd_Leave(object sender, EventArgs e)
-        {
-            if (txtAd.Text.Trim() == "") return;
-
-            // Eğer kod zaten doluysa tekrar arama yapıp çakışmasın
-            if (txtKod.Text != "") return;
-
-            SqlCommand komut = new SqlCommand("Select * From Ilaclar where ilacAdı=@p1", bgl.baglanti());
-            komut.Parameters.AddWithValue("@p1", txtAd.Text.Trim());
-            SqlDataReader dr = komut.ExecuteReader();
-
-            if (dr.Read())
-            {
-                // İsim girildi, kod ve diğerlerini getir
-                txtKod.Text = dr["ilacKodu"].ToString();
-                txtFiyat.Text = dr["fiyat"].ToString();
-
-                // Resmi getir
-                resimYukle(dr["resim"].ToString());
-            }
-            bgl.baglanti().Close();
-        }
-
-        // --- GRID TIKLAMA (LİSTEDEN SEÇME) ---
-        private void gridView1_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
-        {
-            DataRow dr = gridView1.GetDataRow(e.RowHandle);
-            if (dr != null)
-            {
-                txtsiraNo.Text = dr["siraNo"].ToString();
-                txtKod.Text = dr["ilacKodu"].ToString();
-                txtAd.Text = dr["ilacAdı"].ToString();
-                txtFiyat.Text = dr["fiyat"].ToString();
-                txtAdet.Text = dr["adet"].ToString();
-
-                // Resmi getir
-                resimYukle(dr["resim"].ToString());
-            }
-        }
-
-        // --- KAYDET BUTONU (STOK ARTTIRMA + GÜNCELLEME) ---
-        private void btnKaydet_Click(object sender, EventArgs e)
-        {
-            if (txtKod.Text.Trim() == "" || txtAd.Text.Trim() == "" || txtAdet.Text == "")
-            {
-                MessageBox.Show("Lütfen Kod, Ad ve Adet giriniz.");
-                return;
-            }
-
             try
             {
-                // İlaç var mı kontrol et
-                SqlCommand komutKontrol = new SqlCommand("Select Count(*) From Ilaclar where ilacKodu=@p1", bgl.baglanti());
-                komutKontrol.Parameters.AddWithValue("@p1", txtKod.Text.Trim());
-                int sayi = Convert.ToInt32(komutKontrol.ExecuteScalar());
+                SqlCommand komut = new SqlCommand($"Select * From Ilaclar where {kolon}=@p1 AND KullaniciID=@uid", bgl.baglanti());
+                komut.Parameters.AddWithValue("@p1", deger);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                SqlDataReader dr = komut.ExecuteReader();
+                if (dr.Read())
+                {
+                    if (kolon == "ilacAdı") txtKod.Text = dr["ilacKodu"].ToString();
+                    if (kolon == "ilacKodu") txtAd.Text = dr["ilacAdı"].ToString();
+                    txtFiyat.Text = dr["fiyat"].ToString();
+                    resimYukle(dr["resim"].ToString());
+                }
                 bgl.baglanti().Close();
-
-                if (sayi > 0)
-                {
-                    // VARSA GÜNCELLE (STOK EKLE)
-                    if (MessageBox.Show("Bu ilaç zaten var. Girilen adet stoga EKLENSİN Mİ?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    {
-                        SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4 where ilacKodu=@p5", bgl.baglanti());
-                        komut.Parameters.AddWithValue("@p1", int.Parse(txtAdet.Text));
-                        komut.Parameters.AddWithValue("@p2", decimal.Parse(txtFiyat.Text));
-                        komut.Parameters.AddWithValue("@p3", resimDosyaYolu);
-                        komut.Parameters.AddWithValue("@p4", txtAd.Text);
-                        komut.Parameters.AddWithValue("@p5", txtKod.Text);
-
-                        komut.ExecuteNonQuery();
-                        bgl.baglanti().Close();
-                        MessageBox.Show("Stok Eklendi.");
-                    }
-                }
-                else
-                {
-                    // YOKSA YENİ EKLE
-                    SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim) values (@p1, @p2, @p3, @p4, @p5)", bgl.baglanti());
-                    komut.Parameters.AddWithValue("@p1", txtKod.Text);
-                    komut.Parameters.AddWithValue("@p2", txtAd.Text);
-                    komut.Parameters.AddWithValue("@p3", decimal.Parse(txtFiyat.Text));
-                    komut.Parameters.AddWithValue("@p4", int.Parse(txtAdet.Text));
-                    komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
-
-                    komut.ExecuteNonQuery();
-                    bgl.baglanti().Close();
-                    MessageBox.Show("Yeni İlaç Eklendi.");
-                }
-                listele();
-                temizle();
             }
-            catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
+            catch { }
         }
 
-        // --- RESİM SEÇ BUTONU ---
-        private void btnResimSec_Click(object sender, EventArgs e)
+        private void gridView1_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
         {
-            OpenFileDialog dosya = new OpenFileDialog();
-            dosya.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;";
-            if (dosya.ShowDialog() == DialogResult.OK)
+            try
             {
-                resimYukle(dosya.FileName);
+                DataRow dr = gridView1.GetDataRow(e.RowHandle);
+                if (dr != null)
+                {
+                    txtsiraNo.Text = dr["siraNo"].ToString();
+                    txtKod.Text = dr["ilacKodu"].ToString();
+                    txtAd.Text = dr["ilacAdı"].ToString();
+                    txtFiyat.Text = dr["fiyat"].ToString();
+                    txtAdet.Text = dr["adet"].ToString();
+                    resimYukle(dr["resim"].ToString());
+                }
             }
+            catch { }
         }
 
-        // --- GÜNCELLE ---
+        private void btnKaydet_Click(object sender, EventArgs e) { if (!islemYapiliyor) IslemYap("kaydet"); }
         private void btnGuncelle_Click(object sender, EventArgs e)
         {
-            DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
-            if (dr == null) return;
-            string id = dr[0].ToString();
-
-            SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5 where siraNo=@p6", bgl.baglanti());
-            komut.Parameters.AddWithValue("@p1", txtKod.Text);
-            komut.Parameters.AddWithValue("@p2", txtAd.Text);
-            komut.Parameters.AddWithValue("@p3", decimal.Parse(txtFiyat.Text));
-            komut.Parameters.AddWithValue("@p4", int.Parse(txtAdet.Text));
-
-            // Güncel resim yolunu yaz
-            komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
-
-            komut.Parameters.AddWithValue("@p6", id);
-            komut.ExecuteNonQuery();
-            bgl.baglanti().Close();
-            MessageBox.Show("Güncellendi");
-            listele();
-            temizle();
+            if (islemYapiliyor) return;
+            if (gridView1.GetDataRow(gridView1.FocusedRowHandle) == null) { MessageBox.Show("Seçim yapınız."); return; }
+            IslemYap("guncelle");
         }
 
-        // --- SİL ---
         private void btnSil_Click(object sender, EventArgs e)
         {
             DataRow dr = gridView1.GetDataRow(gridView1.FocusedRowHandle);
-            if (dr == null) { MessageBox.Show("Satır seçiniz"); return; }
-            string id = dr[0].ToString();
+            if (dr == null) { MessageBox.Show("Silinecek satırı seçiniz."); return; }
+            string id = dr["siraNo"].ToString();
 
-            if (MessageBox.Show("Silinsin mi?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Silinsin mi?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                SqlCommand komut = new SqlCommand("Delete From Ilaclar where siraNo=@p1", bgl.baglanti());
-                komut.Parameters.AddWithValue("@p1", id);
-                komut.ExecuteNonQuery();
-                bgl.baglanti().Close();
+                try
+                {
+                    SqlCommand komut = new SqlCommand("Delete From Ilaclar where siraNo=@p1 AND KullaniciID=@uid", bgl.baglanti());
+                    komut.Parameters.AddWithValue("@p1", id);
+                    komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                    komut.ExecuteNonQuery();
+                    bgl.baglanti().Close();
+
+                    listele();
+                    temizle();
+                    AnaModuluGuncelle();
+                    MessageBox.Show("Silindi.");
+                }
+                catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
+            }
+        }
+
+        private void btnResimSec_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dosya = new OpenFileDialog();
+            if (dosya.ShowDialog() == DialogResult.OK) resimYukle(dosya.FileName);
+        }
+
+        void IslemYap(string tur)
+        {
+            if (txtKod.Text.Trim() == "" || txtAd.Text.Trim() == "" || txtAdet.Text == "" || txtFiyat.Text.Trim() == "")
+            {
+                MessageBox.Show("Eksik bilgi.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            decimal fiyat = 0;
+            int adet = 0;
+            if (!decimal.TryParse(txtFiyat.Text.Replace(".", ","), out fiyat) || !int.TryParse(txtAdet.Text, out adet))
+            {
+                MessageBox.Show("Sayı hatası. Fiyat veya Adet yanlış.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            islemYapiliyor = true;
+            SqlConnection conn = bgl.baglanti();
+
+            try
+            {
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                if (tur == "kaydet")
+                {
+                    SqlCommand komutKontrol = new SqlCommand("Select Count(*) From Ilaclar where ilacKodu=@p1 AND KullaniciID=@uid", conn);
+                    komutKontrol.Parameters.AddWithValue("@p1", txtKod.Text.Trim());
+                    komutKontrol.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                    int sayi = Convert.ToInt32(komutKontrol.ExecuteScalar());
+
+                    if (sayi > 0)
+                    {
+                        if (MessageBox.Show("İlaç zaten var. Eklensin mi?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
+                            SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4 where ilacKodu=@p5 AND KullaniciID=@uid", conn);
+                            komut.Parameters.AddWithValue("@p1", adet);
+                            komut.Parameters.AddWithValue("@p2", fiyat);
+                            komut.Parameters.AddWithValue("@p3", resimDosyaYolu);
+                            komut.Parameters.AddWithValue("@p4", txtAd.Text);
+                            komut.Parameters.AddWithValue("@p5", txtKod.Text);
+                            komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                            komut.ExecuteNonQuery();
+                            MessageBox.Show("Eklendi.");
+                        }
+                    }
+                    else
+                    {
+                        SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @uid)", conn);
+                        komut.Parameters.AddWithValue("@p1", txtKod.Text);
+                        komut.Parameters.AddWithValue("@p2", txtAd.Text);
+                        komut.Parameters.AddWithValue("@p3", fiyat);
+                        komut.Parameters.AddWithValue("@p4", adet);
+                        komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
+                        komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                        komut.ExecuteNonQuery();
+                        MessageBox.Show("Kaydedildi.");
+                    }
+                }
+                else if (tur == "guncelle")
+                {
+                    string id = txtsiraNo.Text;
+                    SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5 where siraNo=@p6 AND KullaniciID=@uid", conn);
+                    komut.Parameters.AddWithValue("@p1", txtKod.Text);
+                    komut.Parameters.AddWithValue("@p2", txtAd.Text);
+                    komut.Parameters.AddWithValue("@p3", fiyat);
+                    komut.Parameters.AddWithValue("@p4", adet);
+                    komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
+                    komut.Parameters.AddWithValue("@p6", id);
+                    komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                    komut.ExecuteNonQuery();
+                    MessageBox.Show("Güncellendi.");
+                }
+
+                if (conn.State == ConnectionState.Open) conn.Close();
                 listele();
                 temizle();
+                AnaModuluGuncelle();
+            }
+            catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
+            finally { islemYapiliyor = false; if (conn.State == ConnectionState.Open) conn.Close(); }
+        }
+
+        public void OtomatikDoldur(string gelenAd, string gelenAdet)
+        {
+            temizle();
+            txtAd.Text = gelenAd;
+            txtAdet.Text = gelenAdet;
+            txtAd_Leave(this, EventArgs.Empty);
+
+            if (txtKod.Text == "")
+            {
+                txtKod.Focus();
+                MessageBox.Show($"'{gelenAd}' stokta yok. Kod ve Fiyat giriniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }
