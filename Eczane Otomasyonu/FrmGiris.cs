@@ -3,6 +3,7 @@ using System.Data.SqlClient; // SQL işlemleri için
 using System.Windows.Forms;
 using System.Text.RegularExpressions; // Telefon format kontrolü için
 using System.Net.Mail; // Mail format kontrolü için
+using DevExpress.XtraEditors; // Maskeleme özellikleri için kütüphane
 
 namespace Eczane_Otomasyonu
 {
@@ -27,6 +28,25 @@ namespace Eczane_Otomasyonu
 
             // İstersen panelleri formun ortasına konumlandırabilirsin:
             // pnlKayit.Location = new Point(10, 10); 
+
+            // --- YENİ EKLENEN: TELEFON NUMARASI MASKESİ 📞 ---
+            // Bu ayar sayesinde kullanıcı (555) 123-4567 formatını görür.
+
+            // 1. Kayıt Ekranı Telefonu
+            if (txtTel_Kayit.Properties != null)
+            {
+                txtTel_Kayit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.Simple;
+                txtTel_Kayit.Properties.Mask.EditMask = "(999) 000-0000";
+                txtTel_Kayit.Properties.Mask.UseMaskAsDisplayFormat = true;
+            }
+
+            // 2. Şifre Unuttum Ekranı Telefonu
+            if (txtTel_Unuttum.Properties != null)
+            {
+                txtTel_Unuttum.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.Simple;
+                txtTel_Unuttum.Properties.Mask.EditMask = "(999) 000-0000";
+                txtTel_Unuttum.Properties.Mask.UseMaskAsDisplayFormat = true;
+            }
         }
 
         // =============================================================
@@ -80,8 +100,12 @@ namespace Eczane_Otomasyonu
                     return;
                 }
 
+                // Maskeden gelen ( ) - karakterlerini temizleyip sadece rakamları alıyoruz
+                string temizTelefon = txtTel_Kayit.Text.Replace("(", "").Replace(")", "").Replace("-", "").Replace(" ", "");
+
                 // B) Telefon Format Kontrolü (Sadece 10 veya 11 haneli rakam)
-                if (!Regex.IsMatch(txtTel_Kayit.Text, @"^\d{10,11}$"))
+                // (Maske kullandığımız için temizTelefon değişkenini kontrol ediyoruz)
+                if (!Regex.IsMatch(temizTelefon, @"^\d{10,11}$"))
                 {
                     MessageBox.Show("Lütfen geçerli bir telefon numarası giriniz! (Sadece rakam, örn: 05551234567)", "Hatalı Telefon", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -104,7 +128,7 @@ namespace Eczane_Otomasyonu
                 SqlCommand komut = new SqlCommand("INSERT INTO TBL_KULLANICILAR (KULLANICIADI, SIFRE, TELEFON, MAIL) VALUES (@p1, @p2, @p3, @p4)", conn);
                 komut.Parameters.AddWithValue("@p1", txtKadi_Kayit.Text);
                 komut.Parameters.AddWithValue("@p2", txtSifre_Kayit.Text);
-                komut.Parameters.AddWithValue("@p3", txtTel_Kayit.Text);
+                komut.Parameters.AddWithValue("@p3", temizTelefon); // Temizlenmiş telefonu kaydediyoruz
                 komut.Parameters.AddWithValue("@p4", txtMail_Kayit.Text);
 
                 komut.ExecuteNonQuery();
@@ -129,8 +153,11 @@ namespace Eczane_Otomasyonu
         {
             try
             {
+                // Maskeden gelen ( ) - karakterlerini temizleyip sadece rakamları alıyoruz
+                string temizTelefon = txtTel_Unuttum.Text.Replace("(", "").Replace(")", "").Replace("-", "").Replace(" ", "");
+
                 // A) Telefon Format Kontrolü
-                if (!Regex.IsMatch(txtTel_Unuttum.Text, @"^\d{10,11}$"))
+                if (!Regex.IsMatch(temizTelefon, @"^\d{10,11}$"))
                 {
                     MessageBox.Show("Telefon numarası hatalı formatta!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
@@ -150,10 +177,10 @@ namespace Eczane_Otomasyonu
                 // C) Veritabanı Kontrolü
                 SqlConnection conn = bgl.baglanti();
 
-                // Kullanıcıyı doğrula
+                // Kullanıcıyı doğrula (Temizlenmiş telefon ile)
                 SqlCommand komut = new SqlCommand("SELECT * FROM TBL_KULLANICILAR WHERE KULLANICIADI=@p1 AND TELEFON=@p2 AND MAIL=@p3", conn);
                 komut.Parameters.AddWithValue("@p1", txtKAdı_Unuttum.Text);
-                komut.Parameters.AddWithValue("@p2", txtTel_Unuttum.Text);
+                komut.Parameters.AddWithValue("@p2", temizTelefon);
                 komut.Parameters.AddWithValue("@p3", txtMail_Unuttum.Text);
 
                 SqlDataReader dr = komut.ExecuteReader();

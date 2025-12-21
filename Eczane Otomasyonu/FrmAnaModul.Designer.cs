@@ -365,7 +365,7 @@
             // 
             // lstBildirimler
             // 
-            this.lstBildirimler.Location = new System.Drawing.Point(482, 799);
+            this.lstBildirimler.Location = new System.Drawing.Point(56, 881);
             this.lstBildirimler.Name = "lstBildirimler";
             this.lstBildirimler.Size = new System.Drawing.Size(403, 120);
             this.lstBildirimler.TabIndex = 13;
@@ -377,7 +377,7 @@
             this.panelControl1.Controls.Add(this.btnGonder);
             this.panelControl1.Controls.Add(this.txtMesaj);
             this.panelControl1.Controls.Add(this.flowSohbet);
-            this.panelControl1.Location = new System.Drawing.Point(12, 731);
+            this.panelControl1.Location = new System.Drawing.Point(12, 642);
             this.panelControl1.Name = "panelControl1";
             this.panelControl1.Size = new System.Drawing.Size(417, 277);
             this.panelControl1.TabIndex = 8;
