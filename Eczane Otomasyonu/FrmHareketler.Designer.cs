@@ -1,4 +1,5 @@
-﻿namespace Eczane_Otomasyonu
+﻿using DevExpress.XtraEditors;
+namespace Eczane_Otomasyonu
 {
     partial class FrmHareketler
     {
@@ -29,7 +30,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmHareketler));
-            this.components = new System.ComponentModel.Container();
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
@@ -42,6 +42,10 @@
             this.txtHastaAdi = new DevExpress.XtraEditors.TextEdit();
             this.txtTc = new DevExpress.XtraEditors.TextEdit();
             this.lueIlac = new DevExpress.XtraEditors.LookUpEdit();
+            this.gridSepet = new DevExpress.XtraGrid.GridControl();
+            this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.btnSepeteEkle = new DevExpress.XtraEditors.SimpleButton();
+            this.lblToplamTutar = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
@@ -54,6 +58,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lueIlac.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -89,7 +95,6 @@
             this.groupControl1.Name = "groupControl1";
             this.groupControl1.Size = new System.Drawing.Size(411, 258);
             this.groupControl1.TabIndex = 1;
-            this.groupControl1.Text = "groupControl1";
             // 
             // labelControl1
             // 
@@ -192,11 +197,47 @@
             this.lueIlac.TabIndex = 0;
             this.lueIlac.EditValueChanged += new System.EventHandler(this.lueIlac_EditValueChanged);
             // 
+            // gridSepet
+            // 
+            this.gridSepet.Dock = System.Windows.Forms.DockStyle.Right;
+            this.gridSepet.Location = new System.Drawing.Point(1085, 0);
+            this.gridSepet.MainView = this.gridView2;
+            this.gridSepet.Name = "gridSepet";
+            this.gridSepet.Size = new System.Drawing.Size(404, 583);
+            this.gridSepet.TabIndex = 2;
+            this.gridSepet.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridView2});
+            // 
+            // gridView2
+            // 
+            this.gridView2.GridControl = this.gridSepet;
+            this.gridView2.Name = "gridView2";
+            // 
+            // btnSepeteEkle
+            // 
+            this.btnSepeteEkle.Location = new System.Drawing.Point(704, 415);
+            this.btnSepeteEkle.Name = "btnSepeteEkle";
+            this.btnSepeteEkle.Size = new System.Drawing.Size(75, 23);
+            this.btnSepeteEkle.TabIndex = 3;
+            this.btnSepeteEkle.Text = "SEPETE EKLE";
+            this.btnSepeteEkle.Click += new System.EventHandler(this.btnSepeteEkle_Click);
+            // 
+            // lblToplamTutar
+            // 
+            this.lblToplamTutar.Location = new System.Drawing.Point(638, 370);
+            this.lblToplamTutar.Name = "lblToplamTutar";
+            this.lblToplamTutar.Size = new System.Drawing.Size(63, 13);
+            this.lblToplamTutar.TabIndex = 4;
+            this.lblToplamTutar.Text = "labelControl2";
+            // 
             // FrmHareketler
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1489, 583);
+            this.Controls.Add(this.lblToplamTutar);
+            this.Controls.Add(this.btnSepeteEkle);
+            this.Controls.Add(this.gridSepet);
             this.Controls.Add(this.groupControl1);
             this.Controls.Add(this.gridControl1);
             this.Name = "FrmHareketler";
@@ -214,7 +255,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lueIlac.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -232,5 +276,9 @@
         private DevExpress.XtraEditors.TextEdit txtHastaAdi;
         private DevExpress.XtraEditors.TextEdit txtTc;
         private DevExpress.XtraEditors.LabelControl labelControl1;
+        private DevExpress.XtraGrid.GridControl gridSepet;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
+        private SimpleButton btnSepeteEkle;
+        private LabelControl lblToplamTutar;
     }
 }
