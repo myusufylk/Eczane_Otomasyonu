@@ -1,16 +1,17 @@
 ﻿using DevExpress.XtraBars;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq; // List işlemleri için gerekli
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Eczane_Otomasyonu
 {
     // =============================================================
-    // 1. ÖNCE FORM SINIFI GELMELİ (TASARIMCI HATASI OLMAMASI İÇİN)
+    // 1. FORM SINIFI (EN ÜSTTE)
     // =============================================================
     public partial class FrmAnaModul : Form
     {
@@ -20,15 +21,28 @@ namespace Eczane_Otomasyonu
         public FrmAnaModul()
         {
             InitializeComponent();
+
+            // Olayları Bağla
             if (lstBildirimler != null) lstBildirimler.DoubleClick += lstBildirimler_DoubleClick;
             this.MdiChildActivate += FrmAnaModul_MdiChildActivate;
+
+            // --- SADECE ENTER TUŞU İLE GÖNDERME KALDI ---
+            if (txtMesaj != null)
+            {
+                txtMesaj.KeyDown -= txtMesaj_KeyDown;
+                txtMesaj.KeyDown += txtMesaj_KeyDown;
+            }
         }
 
         SqlBaglantisi bgl = new SqlBaglantisi();
         string secilenResimYolu = "";
 
+        // --- FORM YÜKLENİRKEN ---
         private void FrmAnaModul_Load(object sender, EventArgs e)
         {
+            // 1. TAM EKRAN BAŞLAT
+            this.WindowState = FormWindowState.Maximized;
+
             try { ListeleriYenile(); } catch { }
             PanelleriGizle();
             IsletmeBilgileriniGetir();
@@ -37,10 +51,134 @@ namespace Eczane_Otomasyonu
             var btnTamamla = this.Controls.Find("btnSatisTamamla", true);
             if (btnTamamla.Length > 0)
             {
-                // Eski eventleri temizle (Çoklu tıklamayı önler)
                 btnTamamla[0].Click -= btnSatisTamamla_Click;
                 btnTamamla[0].Click += btnSatisTamamla_Click;
             }
+
+            // (Otomatik Focus kodu kaldırıldı)
+        }
+
+        // --- ENTER TUŞUNU YAKALAMA METODU ---
+        private void txtMesaj_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true; // "Dın" sesini engelle
+                btnGonder_Click(sender, e); // Gönder butonuna tıkla
+            }
+        }
+
+        // --- FORM KAPANDIĞINDA PROGRAMI ÖLDÜR ---
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            Application.Exit();
+        }
+
+        // --- YAPAY ZEKA İÇİN VERİ TOPLAYAN METOD ---
+        string MagazaVerileriniTopla()
+        {
+            string veri = "GÜNCEL MAĞAZA VERİLERİ:\n";
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                // 1. Kritik Stoklar
+                SqlCommand cmdStok = new SqlCommand("SELECT ilacAdı, adet FROM Ilaclar WHERE adet < 20 AND KullaniciID=@uid", conn);
+                cmdStok.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                SqlDataReader dr = cmdStok.ExecuteReader();
+                veri += "--- AZALAN STOKLAR ---\n";
+                while (dr.Read())
+                {
+                    veri += $"{dr[0]}: {dr[1]} adet kaldı.\n";
+                }
+                dr.Close();
+
+                // 2. Bugünün Cirosu
+                SqlCommand cmdCiro = new SqlCommand("SELECT SUM(toplamFiyat) FROM Hareketler WHERE tarih >= @t1 AND KullaniciID=@uid", conn);
+                cmdCiro.Parameters.AddWithValue("@t1", DateTime.Today);
+                cmdCiro.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                object ciro = cmdCiro.ExecuteScalar();
+                veri += $"\n--- BUGÜNKÜ PERFORMANS ---\nBugünkü Ciro: {(ciro != DBNull.Value ? decimal.Parse(ciro.ToString()).ToString("C2") : "0 TL")}\n";
+
+                conn.Close();
+            }
+            catch { }
+
+            return veri;
+        }
+
+        // --- SOHBET VE KOMUT MERKEZİ ---
+        private async void btnGonder_Click(object sender, EventArgs e)
+        {
+            string mesaj = txtMesaj.Text.Trim();
+            if (string.IsNullOrEmpty(mesaj)) return;
+
+            MesajEkle(mesaj, true);
+            txtMesaj.Text = "";
+
+            // (Mesaj gönderdikten sonra otomatik odaklanma kaldırıldı)
+
+            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
+
+            string kucukMesaj = mesaj.ToLower();
+
+            // YENİ HASTA (SEPETİ TEMİZLE)
+            if (kucukMesaj.Contains("yeni hasta") || kucukMesaj.Contains("temizle"))
+            {
+                _sepet.Clear();
+                SepetGuncelle();
+                MesajEkle("🗑️ Sepet temizlendi. Yeni hasta için hazır.", false);
+                return;
+            }
+
+            // EKLEME
+            if (kucukMesaj.Contains("ekle")) { KomutEkle(mesaj); return; }
+
+            // SATIŞ
+            if (kucukMesaj.Contains("sat") || kucukMesaj.Contains("ver") || kucukMesaj.Contains("düş")) { KomutSat(mesaj); return; }
+
+            // RAPOR
+            if (kucukMesaj.Contains("ciro") || kucukMesaj.Contains("kazan") || kucukMesaj.Contains("hasılat") || kucukMesaj.Contains("bugün") || kucukMesaj.Contains("rapor") || kucukMesaj.Contains("dün")) { KomutRapor(mesaj); return; }
+
+            // BİLGİ
+            if (kucukMesaj.Contains("ne kadar") || kucukMesaj.Contains("kaç") || kucukMesaj.Contains("fiyat") || kucukMesaj.Contains("stok")) { if (KomutBilgi(mesaj)) return; }
+
+            // --- GELİŞMİŞ YAPAY ZEKA ---
+            try
+            {
+                string gonderilecekSoru = mesaj;
+
+                // A) ANALİZ İSTEĞİ (Veritabanı verisiyle git)
+                if (kucukMesaj.Contains("analiz") || kucukMesaj.Contains("durum nedir") || kucukMesaj.Contains("özet geç"))
+                {
+                    string dukkanVerisi = MagazaVerileriniTopla();
+                    gonderilecekSoru = $"{dukkanVerisi}\n\nBu verilere bakarak bana kısa bir yönetici özeti ve tavsiye ver.";
+                    MesajEkle("📊 Veriler analiz ediliyor...", false);
+                }
+                // B) HASTA TAVSİYESİ (Rol yaparak git)
+                else if (kucukMesaj.Contains("hastam") || kucukMesaj.Contains("önerirsin") || kucukMesaj.Contains("şikayeti"))
+                {
+                    gonderilecekSoru = $"Şu an karşımda bir hasta var. Şikayeti: '{mesaj}'. Ona reçetesiz ne önerebilirim ve nelere dikkat etmeli? (Uyarı: Doktora gitmesini hatırlat)";
+                }
+                // C) GENEL SOHBET (Normal git)
+                else
+                {
+                    string temelBilgi = MagazaDurumunuGetir(); // Basit özet
+                    gonderilecekSoru = $"{temelBilgi}\n\nKULLANICI SORUSU: {mesaj}";
+                }
+
+                string cevap = await GeminiAsistani.Yorumla(gonderilecekSoru);
+                MesajEkle(cevap, false);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("ServiceUnavailable") || ex.Message.Contains("503")) MesajEkle("🔌 Yapay zeka sunucusu şu an çok yoğun. Lütfen bekleyin.", false);
+                else MesajEkle("⚠️ Yapay Zeka Hatası.", false);
+            }
+
+            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
         }
 
         // --- SEPETE EKLEME İŞLEMİ (Eski Satış Komutu Artık Buraya Geliyor) ---
@@ -49,7 +187,6 @@ namespace Eczane_Otomasyonu
             string ilacAdi = "";
             int adet = 1;
 
-            // Regex ile ilacı ve adeti bul
             System.Text.RegularExpressions.Match desenTam = System.Text.RegularExpressions.Regex.Match(mesaj, @"(\d+)\s*(?:adet|tane|kutu)?\s+(.+)\s+(?:sat|ver|düş|ekle)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             System.Text.RegularExpressions.Match desenBasit = System.Text.RegularExpressions.Regex.Match(mesaj, @"(.+)\s+(?:sat|ver|düş|ekle)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
@@ -59,7 +196,7 @@ namespace Eczane_Otomasyonu
 
             ilacAdi = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(ilacAdi);
 
-            // 1. RİSK KONTROLÜ (Sepetteki diğer ilaçlarla çakışıyor mu?)
+            // 1. RİSK KONTROLÜ
             if (!EtkilesimKontrol(ilacAdi)) return;
 
             // 2. STOK KONTROLÜ VE SEPETE EKLEME
@@ -78,61 +215,44 @@ namespace Eczane_Otomasyonu
                     int stok = Convert.ToInt32(dr["adet"]);
                     decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
 
-                    // Sepette zaten varsa, o adeti de hesaba kat
                     var sepetteki = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
                     int sepettekiAdet = sepetteki != null ? sepetteki.Adet : 0;
 
                     if (stok >= (adet + sepettekiAdet))
                     {
-                        if (sepetteki != null)
-                        {
-                            sepetteki.Adet += adet; // Varsa üzerine ekle
-                        }
-                        else
-                        {
-                            _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = adet, BirimFiyat = fiyat });
-                        }
+                        if (sepetteki != null) sepetteki.Adet += adet;
+                        else _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = adet, BirimFiyat = fiyat });
 
                         MesajEkle($"🛒 Sepete Eklendi: {adet} x {ilacAdi}", false);
-                        SepetGuncelle(); // Grid'i yenile
+                        SepetGuncelle();
                     }
-                    else
-                    {
-                        MesajEkle($"❌ Yetersiz Stok! Stok: {stok}, Sepette: {sepettekiAdet}, İstenen: {adet}", false);
-                    }
+                    else MesajEkle($"❌ Yetersiz Stok! Stok: {stok}, Sepette: {sepettekiAdet}, İstenen: {adet}", false);
                 }
-                else
-                {
-                    MesajEkle($"❌ '{ilacAdi}' bulunamadı.", false);
-                }
+                else MesajEkle($"❌ '{ilacAdi}' bulunamadı.", false);
+
                 conn.Close();
             }
             catch (Exception ex) { MesajEkle("Hata: " + ex.Message, false); }
         }
 
-        // --- SEPETİ GRID'E YANSITMA ---
         void SepetGuncelle()
         {
-            // GridControl'ün adı gridSepet olmalı
             var gridler = this.Controls.Find("gridSepet", true);
             if (gridler.Length > 0)
             {
                 DevExpress.XtraGrid.GridControl gc = (DevExpress.XtraGrid.GridControl)gridler[0];
                 gc.DataSource = null;
-                gc.DataSource = _sepet; // Listeyi grid'e bağla
+                gc.DataSource = _sepet;
 
-                // Toplam Tutarı Yazdır
                 decimal toplam = _sepet.Sum(x => x.Toplam);
                 var lbl = this.Controls.Find("lblToplamTutar", true);
                 if (lbl.Length > 0) lbl[0].Text = "TOPLAM: " + toplam.ToString("C2");
             }
         }
 
-        // --- İLAÇ ETKİLEŞİM KONTROLÜ (Sepete Göre) ---
         bool EtkilesimKontrol(string yeniIlac)
         {
             if (_sepet.Count == 0) return true;
-
             try
             {
                 SqlConnection conn = bgl.baglanti();
@@ -141,8 +261,8 @@ namespace Eczane_Otomasyonu
                 foreach (var item in _sepet)
                 {
                     SqlCommand cmd = new SqlCommand("SELECT RiskMesaji FROM Etkilesimler WHERE (Ilac1=@p1 AND Ilac2=@p2) OR (Ilac1=@p2 AND Ilac2=@p1)", conn);
-                    cmd.Parameters.AddWithValue("@p1", yeniIlac);
-                    cmd.Parameters.AddWithValue("@p2", item.IlacAdi);
+                    cmd.Parameters.AddWithValue("@p1", yeniIlac.Trim());
+                    cmd.Parameters.AddWithValue("@p2", item.IlacAdi.Trim());
 
                     object sonuc = cmd.ExecuteScalar();
                     if (sonuc != null)
@@ -159,7 +279,6 @@ namespace Eczane_Otomasyonu
             return true;
         }
 
-        // --- SATIŞI TAMAMLA BUTONU ---
         private void btnSatisTamamla_Click(object sender, EventArgs e)
         {
             if (_sepet.Count == 0) { MessageBox.Show("Sepet boş!"); return; }
@@ -190,14 +309,14 @@ namespace Eczane_Otomasyonu
                 conn.Close();
 
                 MesajEkle("✅ Satış başarıyla tamamlandı.", false);
-                _sepet.Clear(); // Sepeti boşalt
+                _sepet.Clear();
                 SepetGuncelle();
-                ListeleriYenile(); // Stokları güncelle
+                ListeleriYenile();
             }
             catch (Exception ex) { MessageBox.Show("Satış Hatası: " + ex.Message); }
         }
 
-        // --- DİĞER GEREKLİ KODLAR ---
+        // --- DİĞER STANDART KODLAR ---
         private void FrmAnaModul_MdiChildActivate(object sender, EventArgs e)
         {
             bool anaEkrandaMiyiz = (this.ActiveMdiChild == null);
@@ -367,54 +486,6 @@ namespace Eczane_Otomasyonu
                 conn.Close();
             }
             catch { }
-        }
-
-        private async void btnGonder_Click(object sender, EventArgs e)
-        {
-            string mesaj = txtMesaj.Text.Trim();
-            if (string.IsNullOrEmpty(mesaj)) return;
-
-            MesajEkle(mesaj, true);
-            txtMesaj.Text = "";
-            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
-
-            string kucukMesaj = mesaj.ToLower();
-
-            // YENİ HASTA (SEPETİ TEMİZLE)
-            if (kucukMesaj.Contains("yeni hasta") || kucukMesaj.Contains("temizle"))
-            {
-                _sepet.Clear();
-                SepetGuncelle();
-                MesajEkle("🗑️ Sepet temizlendi. Yeni hasta için hazır.", false);
-                return;
-            }
-
-            // EKLEME
-            if (kucukMesaj.Contains("ekle")) { KomutEkle(mesaj); return; }
-
-            // SATIŞ (ARTIK SEPETE ATIYOR)
-            if (kucukMesaj.Contains("sat") || kucukMesaj.Contains("ver") || kucukMesaj.Contains("düş")) { KomutSat(mesaj); return; }
-
-            // RAPOR
-            if (kucukMesaj.Contains("ciro") || kucukMesaj.Contains("kazan") || kucukMesaj.Contains("hasılat") || kucukMesaj.Contains("bugün") || kucukMesaj.Contains("rapor") || kucukMesaj.Contains("dün")) { KomutRapor(mesaj); return; }
-
-            // BİLGİ
-            if (kucukMesaj.Contains("ne kadar") || kucukMesaj.Contains("kaç") || kucukMesaj.Contains("fiyat") || kucukMesaj.Contains("stok")) { if (KomutBilgi(mesaj)) return; }
-
-            // YAPAY ZEKA
-            try
-            {
-                string dukkanBilgisi = MagazaDurumunuGetir();
-                string tamSoru = $"{dukkanBilgisi}\n\nKULLANICI SORUSU: {mesaj}";
-                string cevap = await GeminiAsistani.Yorumla(tamSoru);
-                MesajEkle(cevap, false);
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("ServiceUnavailable") || ex.Message.Contains("503")) MesajEkle("🔌 Yapay zeka sunucusu şu an çok yoğun. Lütfen bekleyin.", false);
-                else MesajEkle("⚠️ Yapay Zeka Hatası.", false);
-            }
-            if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
         }
 
         void KomutEkle(string mesaj)

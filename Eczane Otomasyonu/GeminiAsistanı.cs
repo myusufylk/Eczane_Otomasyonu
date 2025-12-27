@@ -1,63 +1,75 @@
 ﻿using System;
-using System.Net; // Güvenlik protokolü için gerekli
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Eczane_Otomasyonu
 {
-    public class GeminiAsistani
+    public static class GeminiAsistani
     {
-      
-        private const string ApiKey = "AIzaSyBFeYhpcz6JA-7pwADh01G8c1LNJacSrlE";
-            
-        
-        private const string ApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+        // 🛑 BURAYA KENDİ UZUN API ŞİFRENİ YAPIŞTIRMAYI UNUTMA!
+        private static readonly string ApiKey = "AIzaSyBFeYhpcz6JA-7pwADh01G8c1LNJacSrlE";
 
-        public static async Task<string> Yorumla(string soru)
+        // ✅ LİSTENDEKİ EN GÜÇLÜ MODELİ SEÇTİM
+        private static readonly string Model = "gemini-2.5-pro";
+
+        private static readonly string ApiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{Model}:generateContent?key={ApiKey}";
+
+        // Yapay Zekanın Rolü
+        private static readonly string SystemInstruction =
+            "SENİN GÖREVİN: Sen 'Eczane Otomasyonu' içindeki uzman bir Eczacı Asistanısın. " +
+            "Adın 'PharmAI'. " +
+            "Kullanıcıya ilaçlar, yan etkiler ve stok yönetimi konusunda yardım edersin. " +
+            "Cevapların kısa, net, profesyonel ve Türkçe olmalı.";
+
+        public static async Task<string> Yorumla(string kullaniciMesaji)
         {
-            try
+            using (HttpClient client = new HttpClient())
             {
-                // Bağlantı hatası olmaması için TLS 1.2 protokolünü açıyoruz
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
-
-                using (var client = new HttpClient())
+                var requestBody = new
                 {
-                    var requestBody = new
+                    contents = new[]
                     {
-                        contents = new[]
+                        new
                         {
-                            new { parts = new[] { new { text = soru } } }
+                            parts = new[]
+                            {
+                                // Model talimatı (System Instruction) ile kullanıcı sorusunu birleştiriyoruz
+                                new { text = SystemInstruction + "\n\nKULLANICI SORUSU: " + kullaniciMesaji }
+                            }
                         }
-                    };
+                    }
+                };
 
-                    var json = JsonConvert.SerializeObject(requestBody);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                string jsonContent = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                    var response = await client.PostAsync(ApiUrl + ApiKey, content);
-                    var responseString = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsync(ApiUrl, content);
+                    string responseString = await response.Content.ReadAsStringAsync();
 
                     if (response.IsSuccessStatusCode)
                     {
-                        dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
-                        return jsonResponse.candidates[0].content.parts[0].text;
+                        var jsonResponse = JObject.Parse(responseString);
+
+                        if (jsonResponse["candidates"] != null && jsonResponse["candidates"][0]["content"] != null)
+                        {
+                            return jsonResponse["candidates"][0]["content"]["parts"][0]["text"].ToString();
+                        }
+                        return "⚠️ Yapay zeka boş cevap döndü.";
                     }
                     else
                     {
-                        // 429 Hatası (Kota Doldu) için özel mesaj
-                        if ((int)response.StatusCode == 429)
-                        {
-                            return "⚠️ Çok hızlı mesaj yazdın! Google 'biraz bekle' diyor. 1-2 dakika sonra tekrar deneyebilirsin.";
-                        }
-
-                        return $"Bir hata oluştu. Hata Kodu: {response.StatusCode}";
+                        return $"⚠️ Hata: {response.StatusCode} - {responseString}";
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                return "Bağlantı Hatası: " + ex.Message;
+                catch (Exception ex)
+                {
+                    return "⚠️ Bağlantı Hatası: " + ex.Message;
+                }
             }
         }
     }

@@ -32,11 +32,10 @@ namespace Eczane_Otomasyonu
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmGiris));
-            this.txtKullaniciAd = new DevExpress.XtraEditors.TextEdit();
-            this.txtSifre = new DevExpress.XtraEditors.TextEdit();
             this.btnGiris = new DevExpress.XtraEditors.SimpleButton();
             this.btnKapat = new DevExpress.XtraEditors.SimpleButton();
             this.pnlKayit = new DevExpress.XtraEditors.PanelControl();
+            this.label2 = new System.Windows.Forms.Label();
             this.btnGeri_Kayit = new DevExpress.XtraEditors.SimpleButton();
             this.txtKadi_Kayit = new DevExpress.XtraEditors.TextEdit();
             this.btnKaydet = new DevExpress.XtraEditors.SimpleButton();
@@ -44,6 +43,7 @@ namespace Eczane_Otomasyonu
             this.txtTel_Kayit = new DevExpress.XtraEditors.TextEdit();
             this.txtSifre_Kayit = new DevExpress.XtraEditors.TextEdit();
             this.pnlSifreUnuttum = new DevExpress.XtraEditors.PanelControl();
+            this.label1 = new System.Windows.Forms.Label();
             this.txtYeniSifre = new DevExpress.XtraEditors.TextEdit();
             this.txtMail_Unuttum = new DevExpress.XtraEditors.TextEdit();
             this.txtTel_Unuttum = new DevExpress.XtraEditors.TextEdit();
@@ -53,10 +53,8 @@ namespace Eczane_Otomasyonu
             this.btnŞfrUnuttum = new DevExpress.XtraEditors.SimpleButton();
             this.btnKayıtOl = new DevExpress.XtraEditors.SimpleButton();
             this.behaviorManager1 = new DevExpress.Utils.Behaviors.BehaviorManager(this.components);
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAd.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).BeginInit();
+            this.txtKullaniciAd = new DevExpress.XtraEditors.TextEdit();
+            this.txtSifre = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlKayit)).BeginInit();
             this.pnlKayit.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtKadi_Kayit.Properties)).BeginInit();
@@ -70,31 +68,9 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtTel_Unuttum.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtKAdı_Unuttum.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.behaviorManager1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAd.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).BeginInit();
             this.SuspendLayout();
-            // 
-            // txtKullaniciAd
-            // 
-            this.txtKullaniciAd.Location = new System.Drawing.Point(293, 187);
-            this.txtKullaniciAd.Name = "txtKullaniciAd";
-            this.txtKullaniciAd.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtKullaniciAd.Properties.Appearance.Options.UseFont = true;
-            this.txtKullaniciAd.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
-            this.txtKullaniciAd.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("txtKullaniciAd.Properties.ContextImageOptions.Image")));
-            this.txtKullaniciAd.Properties.NullText = "KULLANICI ADI";
-            this.txtKullaniciAd.Size = new System.Drawing.Size(165, 36);
-            this.txtKullaniciAd.TabIndex = 2;
-            // 
-            // txtSifre
-            // 
-            this.txtSifre.Location = new System.Drawing.Point(292, 240);
-            this.txtSifre.Name = "txtSifre";
-            this.txtSifre.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtSifre.Properties.Appearance.Options.UseFont = true;
-            this.txtSifre.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
-            this.txtSifre.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("txtSifre.Properties.ContextImageOptions.Image")));
-            this.txtSifre.Properties.NullText = "ŞİFRE";
-            this.txtSifre.Size = new System.Drawing.Size(166, 36);
-            this.txtSifre.TabIndex = 3;
             // 
             // btnGiris
             // 
@@ -129,11 +105,21 @@ namespace Eczane_Otomasyonu
             this.pnlKayit.Controls.Add(this.txtMail_Kayit);
             this.pnlKayit.Controls.Add(this.txtTel_Kayit);
             this.pnlKayit.Controls.Add(this.txtSifre_Kayit);
-            this.pnlKayit.Location = new System.Drawing.Point(239, 138);
+            this.pnlKayit.Location = new System.Drawing.Point(261, 138);
             this.pnlKayit.Name = "pnlKayit";
             this.pnlKayit.Size = new System.Drawing.Size(240, 300);
             this.pnlKayit.TabIndex = 6;
             this.pnlKayit.Visible = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label2.Location = new System.Drawing.Point(61, 5);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(79, 21);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "KAYIT OL";
             // 
             // btnGeri_Kayit
             // 
@@ -220,11 +206,21 @@ namespace Eczane_Otomasyonu
             this.pnlSifreUnuttum.Controls.Add(this.txtKAdı_Unuttum);
             this.pnlSifreUnuttum.Controls.Add(this.btnGeri_Unuttum);
             this.pnlSifreUnuttum.Controls.Add(this.btnGuncelle);
-            this.pnlSifreUnuttum.Location = new System.Drawing.Point(239, 138);
+            this.pnlSifreUnuttum.Location = new System.Drawing.Point(256, 138);
             this.pnlSifreUnuttum.Name = "pnlSifreUnuttum";
             this.pnlSifreUnuttum.Size = new System.Drawing.Size(240, 300);
             this.pnlSifreUnuttum.TabIndex = 7;
             this.pnlSifreUnuttum.Visible = false;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label1.Location = new System.Drawing.Point(66, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(156, 21);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "ŞİFREMİ UNUTTUM";
             // 
             // txtYeniSifre
             // 
@@ -330,25 +326,32 @@ namespace Eczane_Otomasyonu
             this.btnKayıtOl.Text = "KAYIT OL ";
             this.btnKayıtOl.Click += new System.EventHandler(this.lnkKayitOl_Click);
             // 
-            // label1
+            // txtKullaniciAd
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label1.Location = new System.Drawing.Point(66, 7);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(156, 21);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "ŞİFREMİ UNUTTUM";
+            this.txtKullaniciAd.EditValue = "";
+            this.txtKullaniciAd.Location = new System.Drawing.Point(292, 189);
+            this.txtKullaniciAd.Name = "txtKullaniciAd";
+            this.txtKullaniciAd.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtKullaniciAd.Properties.Appearance.Options.UseFont = true;
+            this.txtKullaniciAd.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
+            this.txtKullaniciAd.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("textEdit2.Properties.ContextImageOptions.Image")));
+            this.txtKullaniciAd.Properties.NullValuePrompt = "KULLANICI ADI";
+            this.txtKullaniciAd.Size = new System.Drawing.Size(166, 36);
+            this.txtKullaniciAd.TabIndex = 14;
             // 
-            // label2
+            // txtSifre
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label2.Location = new System.Drawing.Point(61, 5);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(79, 21);
-            this.label2.TabIndex = 14;
-            this.label2.Text = "KAYIT OL";
+            this.txtSifre.EditValue = "";
+            this.txtSifre.Location = new System.Drawing.Point(292, 242);
+            this.txtSifre.Name = "txtSifre";
+            this.txtSifre.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtSifre.Properties.Appearance.Options.UseFont = true;
+            this.txtSifre.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
+            this.txtSifre.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("textEdit2.Properties.ContextImageOptions.Image1")));
+            this.txtSifre.Properties.NullValuePrompt = "ŞİFRE";
+            this.txtSifre.Properties.PasswordChar = '*';
+            this.txtSifre.Size = new System.Drawing.Size(166, 36);
+            this.txtSifre.TabIndex = 16;
             // 
             // FrmGiris
             // 
@@ -356,14 +359,14 @@ namespace Eczane_Otomasyonu
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(750, 450);
+            this.Controls.Add(this.txtSifre);
+            this.Controls.Add(this.txtKullaniciAd);
             this.Controls.Add(this.btnKayıtOl);
             this.Controls.Add(this.btnŞfrUnuttum);
             this.Controls.Add(this.pnlSifreUnuttum);
             this.Controls.Add(this.pnlKayit);
             this.Controls.Add(this.btnKapat);
             this.Controls.Add(this.btnGiris);
-            this.Controls.Add(this.txtSifre);
-            this.Controls.Add(this.txtKullaniciAd);
             this.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(5);
@@ -371,8 +374,6 @@ namespace Eczane_Otomasyonu
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.FrmGiris_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAd.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlKayit)).EndInit();
             this.pnlKayit.ResumeLayout(false);
             this.pnlKayit.PerformLayout();
@@ -388,14 +389,14 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtTel_Unuttum.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtKAdı_Unuttum.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.behaviorManager1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtKullaniciAd.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSifre.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
         private TextEdit textEdit1;
-        private TextEdit txtSifre;
-        private TextEdit txtKullaniciAd;
         private SimpleButton btnGiris;
         private SimpleButton btnKapat;
         private PanelControl pnlKayit;
@@ -417,5 +418,7 @@ namespace Eczane_Otomasyonu
         private SimpleButton btnGeri_Kayit;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
+        private TextEdit txtKullaniciAd;
+        private TextEdit txtSifre;
     }
 }

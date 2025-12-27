@@ -75,6 +75,7 @@
             this.txtIsletmeTel = new DevExpress.XtraEditors.TextEdit();
             this.txtIsletmeSahip = new DevExpress.XtraEditors.TextEdit();
             this.txtIsletmeAdi = new DevExpress.XtraEditors.TextEdit();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlTahmin)).BeginInit();
@@ -357,15 +358,15 @@
             // 
             this.flowSohbet.AutoScroll = true;
             this.flowSohbet.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowSohbet.Location = new System.Drawing.Point(5, 5);
+            this.flowSohbet.Location = new System.Drawing.Point(5, 16);
             this.flowSohbet.Name = "flowSohbet";
-            this.flowSohbet.Size = new System.Drawing.Size(403, 225);
+            this.flowSohbet.Size = new System.Drawing.Size(403, 214);
             this.flowSohbet.TabIndex = 7;
             this.flowSohbet.WrapContents = false;
             // 
             // lstBildirimler
             // 
-            this.lstBildirimler.Location = new System.Drawing.Point(56, 881);
+            this.lstBildirimler.Location = new System.Drawing.Point(363, 850);
             this.lstBildirimler.Name = "lstBildirimler";
             this.lstBildirimler.Size = new System.Drawing.Size(403, 120);
             this.lstBildirimler.TabIndex = 13;
@@ -373,13 +374,14 @@
             // 
             // panelControl1
             // 
+            this.panelControl1.Controls.Add(this.labelControl3);
             this.panelControl1.Controls.Add(this.simpleButton1);
             this.panelControl1.Controls.Add(this.btnGonder);
             this.panelControl1.Controls.Add(this.txtMesaj);
             this.panelControl1.Controls.Add(this.flowSohbet);
             this.panelControl1.Location = new System.Drawing.Point(12, 642);
             this.panelControl1.Name = "panelControl1";
-            this.panelControl1.Size = new System.Drawing.Size(417, 277);
+            this.panelControl1.Size = new System.Drawing.Size(420, 280);
             this.panelControl1.TabIndex = 8;
             this.panelControl1.Visible = false;
             // 
@@ -525,6 +527,16 @@
             this.txtIsletmeAdi.Size = new System.Drawing.Size(283, 28);
             this.txtIsletmeAdi.TabIndex = 0;
             // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.Location = new System.Drawing.Point(132, 5);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(178, 21);
+            this.labelControl3.TabIndex = 19;
+            this.labelControl3.Text = "YARDIMCI ASİSTANINIZ";
+            // 
             // FrmAnaModul
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -539,7 +551,9 @@
             this.Controls.Add(this.ribbon);
             this.IsMdiContainer = true;
             this.Name = "FrmAnaModul";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "FrmAnaModul";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.FrmAnaModul_Load);
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).EndInit();
@@ -552,6 +566,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
             this.panelControl1.ResumeLayout(false);
+            this.panelControl1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtMesaj.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlAyarlar)).EndInit();
             this.pnlAyarlar.ResumeLayout(false);
@@ -612,5 +627,6 @@
         private DevExpress.XtraEditors.SimpleButton btnAyarlarKapat;
         private DevExpress.XtraEditors.SimpleButton btnResimSec;
         private DevExpress.XtraEditors.PictureEdit peLogo;
+        private DevExpress.XtraEditors.LabelControl labelControl3;
     }
 }
