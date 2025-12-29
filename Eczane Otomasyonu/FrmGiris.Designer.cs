@@ -334,7 +334,7 @@ namespace Eczane_Otomasyonu
             this.txtKullaniciAd.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtKullaniciAd.Properties.Appearance.Options.UseFont = true;
             this.txtKullaniciAd.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
-            this.txtKullaniciAd.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("textEdit2.Properties.ContextImageOptions.Image")));
+            this.txtKullaniciAd.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("txtKullaniciAd.Properties.ContextImageOptions.Image")));
             this.txtKullaniciAd.Properties.NullValuePrompt = "KULLANICI ADI";
             this.txtKullaniciAd.Size = new System.Drawing.Size(166, 36);
             this.txtKullaniciAd.TabIndex = 14;
@@ -347,7 +347,7 @@ namespace Eczane_Otomasyonu
             this.txtSifre.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtSifre.Properties.Appearance.Options.UseFont = true;
             this.txtSifre.Properties.ContextImageOptions.Alignment = DevExpress.XtraEditors.ContextImageAlignment.Far;
-            this.txtSifre.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("textEdit2.Properties.ContextImageOptions.Image1")));
+            this.txtSifre.Properties.ContextImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("txtSifre.Properties.ContextImageOptions.Image")));
             this.txtSifre.Properties.NullValuePrompt = "ŞİFRE";
             this.txtSifre.Properties.PasswordChar = '*';
             this.txtSifre.Size = new System.Drawing.Size(166, 36);
@@ -357,6 +357,7 @@ namespace Eczane_Otomasyonu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(750, 450);
             this.Controls.Add(this.txtSifre);

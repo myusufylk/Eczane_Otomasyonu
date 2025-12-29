@@ -1,12 +1,14 @@
-﻿using System;
+﻿using DevExpress.XtraEditors;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Printing;
-using System.Windows.Forms;
-using System.Data.SqlClient;
-using DevExpress.XtraEditors;
 using System.Linq;
+using System.Windows.Forms;
+using Tesseract; // OCR Kütüphanesi
+using System.IO;   // Dosya işlemleri için
 
 namespace Eczane_Otomasyonu
 {
@@ -15,31 +17,47 @@ namespace Eczane_Otomasyonu
         SqlBaglantisi bgl = new SqlBaglantisi();
         bool islemYapiliyor = false;
 
-        // SepetItem sınıfı FrmAnaModul.cs içinde tanımlı, oradan kullanıyoruz.
+        // Sepet Listesi
         List<SepetItem> _sepet = new List<SepetItem>();
 
         public FrmHareketler()
         {
             InitializeComponent();
 
-            // Olayları Bağla
+            // --- OLAYLARI GÜVENLİ BAĞLAMA ---
+            // Form Yüklenirken
             this.Load -= FrmHareketler_Load;
             this.Load += FrmHareketler_Load;
 
+            // İlaç Seçimi Değişince
             lueIlac.EditValueChanged -= lueIlac_EditValueChanged;
             lueIlac.EditValueChanged += lueIlac_EditValueChanged;
 
+            // TC Girilince
             txtTc.Leave -= txtTc_Leave;
             txtTc.Leave += txtTc_Leave;
 
-            // Manuel Buton Bağlama
+            // Barkod Kutusu (Eğer tasarımda eklediysen)
+            if (txtBarkod != null)
+            {
+                txtBarkod.KeyDown -= txtBarkod_KeyDown;
+                txtBarkod.KeyDown += txtBarkod_KeyDown;
+            }
+
+            // Butonları Bağla (İsimler tasarımda farklıysa hata vermesin diye try-catch)
             try
             {
+                // Satış Yap Butonu
                 var btnSatis = this.Controls.Find("btnSatisYap", true);
                 if (btnSatis.Length > 0) { btnSatis[0].Click -= btnSatisYap_Click; btnSatis[0].Click += btnSatisYap_Click; }
 
+                // Sepete Ekle Butonu
                 var btnSepet = this.Controls.Find("btnSepeteEkle", true);
                 if (btnSepet.Length > 0) { btnSepet[0].Click -= btnSepeteEkle_Click; btnSepet[0].Click += btnSepeteEkle_Click; }
+
+                // 📸 REÇETE OKU Butonu
+                var btnRecete = this.Controls.Find("btnReceteYukle", true);
+                if (btnRecete.Length > 0) { btnRecete[0].Click -= btnReceteYukle_Click; btnRecete[0].Click += btnReceteYukle_Click; }
             }
             catch { }
         }
@@ -54,7 +72,7 @@ namespace Eczane_Otomasyonu
             lueIlac.Properties.NullText = "İlaç Seçiniz";
             lueIlac.Properties.SearchMode = DevExpress.XtraEditors.Controls.SearchMode.AutoFilter;
 
-            // TC Kimlik Maskesi (Görünür olması için Simple yaptık)
+            // TC Kimlik Maskesi
             txtTc.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.Simple;
             txtTc.Properties.Mask.EditMask = "00000000000";
             txtTc.Properties.Mask.UseMaskAsDisplayFormat = true;
@@ -62,7 +80,9 @@ namespace Eczane_Otomasyonu
             gridView1.OptionsBehavior.Editable = false;
         }
 
-        // --- 1. DÜZELTME: SEPETE EKLE (MESAJ KUTUSU YOK, LABEL GÜNCELLEME VAR) ---
+        // ============================================================
+        // 1. SEPET İŞLEMLERİ
+        // ============================================================
         private void btnSepeteEkle_Click(object sender, EventArgs e)
         {
             if (lueIlac.EditValue == null || txtAdet.Text == "")
@@ -77,13 +97,11 @@ namespace Eczane_Otomasyonu
             decimal fiyat = 0;
             decimal.TryParse(txtFiyat.Text, out fiyat);
 
-            // 1. İlaç Etkileşim Kontrolü
+            // Kontroller
             if (!EtkilesimKontrol(ilacAdi)) return;
-
-            // 2. Stok Kontrolü
             if (!StokYeterliMi(ilacAdi, adet)) return;
 
-            // 3. Sepete Ekle
+            // Sepete Ekle
             var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
             if (mevcut != null)
             {
@@ -96,14 +114,13 @@ namespace Eczane_Otomasyonu
 
             SepetGuncelle();
 
-            // Alanları temizle
+            // Temizlik
             lueIlac.EditValue = null;
             txtAdet.Text = "";
             txtFiyat.Text = "";
             txtToplam.Text = "";
         }
 
-        // --- SEPETİ VE TOPLAM TUTAR LABELINI GÜNCELLE ---
         void SepetGuncelle()
         {
             try
@@ -117,16 +134,12 @@ namespace Eczane_Otomasyonu
                     gc.DataSource = _sepet;
                 }
 
-                // Toplam Tutarı Label'a Yaz (DÜZELTİLDİ)
+                // Toplam Tutarı Label'a Yaz
                 decimal toplam = _sepet.Sum(x => x.Toplam);
-                var lbl = this.Controls.Find("lblToplamTutar", true); // Label ismi lblToplamTutar olmalı
-                if (lbl.Length > 0)
-                {
-                    lbl[0].Text = $"{toplam:C2}"; // Örn: ₺156,00 yazar
-                }
+                var lbl = this.Controls.Find("lblToplamTutar", true);
+                if (lbl.Length > 0) lbl[0].Text = $"{toplam:C2}";
                 else
                 {
-                    // Bulamazsa labelControl2'yi dene (ekran görüntüsündeki isim)
                     var lbl2 = this.Controls.Find("labelControl2", true);
                     if (lbl2.Length > 0) lbl2[0].Text = $"TOPLAM: {toplam:C2}";
                 }
@@ -134,165 +147,149 @@ namespace Eczane_Otomasyonu
             catch { }
         }
 
-        // --- 2. DÜZELTME: FİŞ TASARIMI (DB'DEN BİLGİ ÇEKME GERİ GELDİ) ---
-        private void FisTasarimi(object sender, PrintPageEventArgs e)
+        // ============================================================
+        // 2. BARKOD İLE HIZLI SATIŞ
+        // ============================================================
+        private void txtBarkod_KeyDown(object sender, KeyEventArgs e)
         {
-            string eczaneAdi = "ECZANE OTOMASYONU";
-            string adres = "";
-            string telefon = "";
-            string logoYolu = "";
+            if (e.KeyCode == Keys.Enter)
+            {
+                string okunanBarkod = txtBarkod.Text.Trim();
+                if (!string.IsNullOrEmpty(okunanBarkod))
+                {
+                    BarkodlaSepeteEkle(okunanBarkod);
+                    txtBarkod.Text = ""; // Temizle
+                    e.SuppressKeyPress = true; // Sesi kapat
+                    txtBarkod.Focus(); // İmleci geri getir
+                }
+            }
+        }
 
-            // Veritabanından Bilgileri Çek
+        void BarkodlaSepeteEkle(string barkod)
+        {
             try
             {
                 SqlConnection conn = bgl.baglanti();
                 if (conn.State == ConnectionState.Closed) conn.Open();
 
-                SqlCommand komut = new SqlCommand("Select top 1 * From Isletme WHERE KullaniciID=@uid", conn);
-                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
-                SqlDataReader dr = komut.ExecuteReader();
-                if (dr.Read())
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Ilaclar WHERE Barkod=@p1 AND KullaniciID=@uid", conn);
+                cmd.Parameters.AddWithValue("@p1", barkod);
+                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                SqlDataReader dr = cmd.ExecuteReader();
+                if (dr.Read()) // İlaç bulundu
                 {
-                    eczaneAdi = dr["Ad"].ToString().ToUpper();
-                    adres = dr["Adres"].ToString();
-                    telefon = dr["Telefon"].ToString();
-                    if (dr["LogoYolu"] != DBNull.Value) logoYolu = dr["LogoYolu"].ToString();
+                    string ilacAdi = dr["ilacAdı"].ToString();
+                    decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
+                    dr.Close();
+
+                    if (!EtkilesimKontrol(ilacAdi)) { conn.Close(); return; }
+                    if (!StokYeterliMi(ilacAdi, 1)) { conn.Close(); return; }
+
+                    var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
+                    if (mevcut != null) mevcut.Adet++;
+                    else _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = 1, BirimFiyat = fiyat });
+
+                    SepetGuncelle();
+                    System.Media.SystemSounds.Asterisk.Play();
+                }
+                else
+                {
+                    MessageBox.Show("Bu barkoda ait ilaç bulunamadı!", "Uyarı");
                 }
                 conn.Close();
             }
-            catch { }
+            catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); }
+        }
 
-            // Çizim Ayarları
-            Font baslikFont = new Font("Arial", 16, FontStyle.Bold);
-            Font altBaslik = new Font("Arial", 10, FontStyle.Bold);
-            Font icerik = new Font("Arial", 9);
-            Brush firca = Brushes.Black;
-            float genislik = e.PageBounds.Width;
-            int y = 20;
-            int h = 20;
-            StringFormat merkez = new StringFormat() { Alignment = StringAlignment.Center };
+        // ============================================================
+        // 3. OCR - FOTOĞRAFTAN REÇETE OKUMA (BURASI ARTIK HAZIR!)
+        // ============================================================
+        private void btnReceteYukle_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dosya = new OpenFileDialog();
+            dosya.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp";
+            dosya.Title = "Reçete Fotoğrafını Seçin";
 
-            // 1. LOGO
-            if (!string.IsNullOrEmpty(logoYolu) && System.IO.File.Exists(logoYolu))
+            if (dosya.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    Image img = Image.FromFile(logoYolu);
-                    e.Graphics.DrawImage(img, (int)((genislik - 80) / 2), y, 80, 60);
-                    y += 70;
+                    // 1. Programın çalıştığı klasördeki 'tessdata'yı bul
+                    string tessYolu = System.IO.Path.Combine(Application.StartupPath, "tessdata");
+
+                    // 2. Tesseract'ı Türkçe (tur) olarak başlat
+                    using (var motor = new TesseractEngine(tessYolu, "tur", EngineMode.Default))
+                    {
+                        using (var resim = Pix.LoadFromFile(dosya.FileName))
+                        {
+                            using (var sayfa = motor.Process(resim))
+                            {
+                                // 3. Metni Oku
+                                string okunanMetin = sayfa.GetText();
+                                MessageBox.Show("📷 Okunan Reçete:\n------------------\n" + okunanMetin, "OCR Analizi");
+
+                                // 4. Metin içindeki ilaçları bul ve sepete at
+                                RecetedekiIlaclariBul(okunanMetin);
+                            }
+                        }
+                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("OCR Hatası: " + ex.Message);
+                }
             }
-
-            // 2. BAŞLIK VE İLETİŞİM
-            e.Graphics.DrawString(eczaneAdi, baslikFont, firca, new RectangleF(0, y, genislik, 30), merkez); y += 30;
-            e.Graphics.DrawString(adres, icerik, firca, new RectangleF(0, y, genislik, 40), merkez); y += 40;
-            e.Graphics.DrawString($"Tel: {telefon}", icerik, firca, new RectangleF(0, y, genislik, 20), merkez); y += 30;
-
-            e.Graphics.DrawString("------------------------------------------------", icerik, firca, 10, y); y += h;
-
-            // 3. FİŞ BİLGİLERİ
-            e.Graphics.DrawString($"Tarih: {DateTime.Now}", icerik, firca, 10, y); y += h;
-            e.Graphics.DrawString($"TC: {txtTc.Text}", icerik, firca, 10, y); y += h;
-            e.Graphics.DrawString($"Hasta: {txtHastaAdi.Text}", icerik, firca, 10, y); y += h + 10;
-
-            // 4. ÜRÜNLER
-            e.Graphics.DrawString("Ürün Adı", altBaslik, firca, 10, y);
-            e.Graphics.DrawString("Adet", altBaslik, firca, 180, y);
-            e.Graphics.DrawString("Tutar", altBaslik, firca, 230, y);
-            y += h;
-
-            decimal genelToplam = 0;
-            foreach (var item in _sepet)
-            {
-                e.Graphics.DrawString(item.IlacAdi, icerik, firca, 10, y);
-                e.Graphics.DrawString(item.Adet.ToString(), icerik, firca, 190, y);
-                e.Graphics.DrawString(item.Toplam.ToString("C2"), icerik, firca, 230, y);
-                genelToplam += item.Toplam;
-                y += h;
-            }
-
-            e.Graphics.DrawString("------------------------------------------------", icerik, firca, 10, y); y += h;
-            e.Graphics.DrawString($"TOPLAM: {genelToplam:C2}", baslikFont, firca, 150, y);
         }
 
-        // --- 3. DÜZELTME: ETKİLEŞİM KONTROLÜ (TRIM İLE GÜÇLENDİRİLDİ) ---
-        bool EtkilesimKontrol(string yeniIlac)
+        void RecetedekiIlaclariBul(string metin)
         {
-            // Sepet boşsa risk yoktur
-            if (_sepet.Count == 0) return true;
+            metin = metin.ToLower(); // Karşılaştırma için küçült
+            int bulunanSayisi = 0;
 
             try
             {
                 SqlConnection conn = bgl.baglanti();
                 if (conn.State == ConnectionState.Closed) conn.Open();
 
-                foreach (var item in _sepet)
+                SqlCommand cmd = new SqlCommand("SELECT ilacAdı, fiyat FROM Ilaclar WHERE KullaniciID=@uid", conn);
+                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
                 {
-                    // SQL TABLOSUNUN DOLU OLDUĞUNDAN EMİN OLMALISIN!
-                    // .Trim() sayesinde görünmez boşlukları temizler ve eşleşmeyi garantiler.
-                    SqlCommand cmd = new SqlCommand("SELECT RiskMesaji FROM Etkilesimler WHERE (Ilac1=@p1 AND Ilac2=@p2) OR (Ilac1=@p2 AND Ilac2=@p1)", conn);
-                    cmd.Parameters.AddWithValue("@p1", yeniIlac.Trim());
-                    cmd.Parameters.AddWithValue("@p2", item.IlacAdi.Trim());
+                    string dbIlacAdi = dr["ilacAdı"].ToString();
+                    decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
 
-                    object sonuc = cmd.ExecuteScalar();
-                    if (sonuc != null)
+                    // Metin içinde bu ilaç adı geçiyor mu?
+                    if (metin.Contains(dbIlacAdi.ToLower()))
                     {
-                        string risk = sonuc.ToString();
-                        conn.Close();
+                        var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == dbIlacAdi);
+                        if (mevcut != null) mevcut.Adet++;
+                        else _sepet.Add(new SepetItem { IlacAdi = dbIlacAdi, Adet = 1, BirimFiyat = fiyat });
 
-                        // UYARI PENCERESİ
-                        DialogResult cvp = MessageBox.Show(
-                            $"⚠️ İLAÇ ETKİLEŞİM RİSKİ TESPİT EDİLDİ!\n\n" +
-                            $"Sepetteki İlaç: {item.IlacAdi}\n" +
-                            $"Eklenen İlaç: {yeniIlac}\n\n" +
-                            $"RİSK: {risk}\n\n" +
-                            $"Yine de eklemek istiyor musunuz?",
-                            "HAYATİ UYARI",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Stop);
-
-                        return (cvp == DialogResult.Yes);
+                        bulunanSayisi++;
                     }
                 }
                 conn.Close();
+                SepetGuncelle();
+
+                if (bulunanSayisi > 0)
+                    MessageBox.Show($"✅ Reçetede {bulunanSayisi} adet ilaç bulundu ve sepete eklendi!", "Başarılı");
+                else
+                    MessageBox.Show("❌ Reçete okundu ama listedeki ilaçlarla eşleşen bir isim bulunamadı.\n(İlaç ismi reçetede net görünmeli ve veritabanıyla aynı yazılmalı)", "Sonuç");
             }
             catch { }
-            return true;
         }
 
-        // --- DİĞER METODLAR (Standart) ---
-        bool StokYeterliMi(string ilacAdi, int istenenAdet)
-        {
-            try
-            {
-                SqlConnection conn = bgl.baglanti();
-                SqlCommand cmd = new SqlCommand("Select adet From Ilaclar where ilacAdı=@p1 AND KullaniciID=@uid", conn);
-                cmd.Parameters.AddWithValue("@p1", ilacAdi);
-                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
-                object sonuc = cmd.ExecuteScalar();
-                conn.Close();
-                int dbStok = (sonuc != null) ? Convert.ToInt32(sonuc) : 0;
-
-                var sepetteki = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
-                int sepettekiAdet = sepetteki != null ? sepetteki.Adet : 0;
-
-                if (dbStok < (istenenAdet + sepettekiAdet))
-                {
-                    MessageBox.Show($"Stok Yetersiz! Eldeki: {dbStok}, Sepette: {sepettekiAdet}", "Hata");
-                    return false;
-                }
-                return true;
-            }
-            catch { return false; }
-        }
-
+        // ============================================================
+        // 4. SATIŞ VE FİŞ İŞLEMLERİ
+        // ============================================================
         private async void btnSatisYap_Click(object sender, EventArgs e)
         {
             if (islemYapiliyor) return;
             if (_sepet.Count == 0)
             {
-                // Eğer sepet boşsa ama kutularda veri varsa, önce sepete ekle
                 if (lueIlac.EditValue != null && txtAdet.Text != "") btnSepeteEkle_Click(sender, e);
                 else { MessageBox.Show("Sepet boş!", "Uyarı"); return; }
             }
@@ -321,7 +318,7 @@ namespace Eczane_Otomasyonu
                     cmdEkle.ExecuteNonQuery();
                 }
 
-                // Satış İşlemleri
+                // Satış Hareketleri
                 foreach (var item in _sepet)
                 {
                     SqlCommand cmdDus = new SqlCommand("Update Ilaclar set adet=adet-@p1 where ilacAdı=@p2 AND KullaniciID=@uid", conn);
@@ -363,6 +360,134 @@ namespace Eczane_Otomasyonu
             onizleme.ShowDialog();
         }
 
+        private void FisTasarimi(object sender, PrintPageEventArgs e)
+        {
+            string eczaneAdi = "ECZANE OTOMASYONU";
+            string adres = "";
+            string telefon = "";
+            string logoYolu = "";
+
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                SqlCommand komut = new SqlCommand("Select top 1 * From Isletme WHERE KullaniciID=@uid", conn);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                SqlDataReader dr = komut.ExecuteReader();
+                if (dr.Read())
+                {
+                    eczaneAdi = dr["Ad"].ToString().ToUpper();
+                    adres = dr["Adres"].ToString();
+                    telefon = dr["Telefon"].ToString();
+                    if (dr["LogoYolu"] != DBNull.Value) logoYolu = dr["LogoYolu"].ToString();
+                }
+                conn.Close();
+            }
+            catch { }
+
+            Font baslikFont = new Font("Arial", 16, FontStyle.Bold);
+            Font altBaslik = new Font("Arial", 10, FontStyle.Bold);
+            Font icerik = new Font("Arial", 9);
+            Brush firca = Brushes.Black;
+            float genislik = e.PageBounds.Width;
+            int y = 20;
+            int h = 20;
+            StringFormat merkez = new StringFormat() { Alignment = StringAlignment.Center };
+
+            if (!string.IsNullOrEmpty(logoYolu) && System.IO.File.Exists(logoYolu))
+            {
+                try
+                {
+                    Image img = Image.FromFile(logoYolu);
+                    e.Graphics.DrawImage(img, (int)((genislik - 80) / 2), y, 80, 60);
+                    y += 70;
+                }
+                catch { }
+            }
+
+            e.Graphics.DrawString(eczaneAdi, baslikFont, firca, new RectangleF(0, y, genislik, 30), merkez); y += 30;
+            e.Graphics.DrawString(adres, icerik, firca, new RectangleF(0, y, genislik, 40), merkez); y += 40;
+            e.Graphics.DrawString($"Tel: {telefon}", icerik, firca, new RectangleF(0, y, genislik, 20), merkez); y += 30;
+            e.Graphics.DrawString("------------------------------------------------", icerik, firca, 10, y); y += h;
+
+            e.Graphics.DrawString($"Tarih: {DateTime.Now}", icerik, firca, 10, y); y += h;
+            e.Graphics.DrawString($"TC: {txtTc.Text}", icerik, firca, 10, y); y += h;
+            e.Graphics.DrawString($"Hasta: {txtHastaAdi.Text}", icerik, firca, 10, y); y += h + 10;
+
+            e.Graphics.DrawString("Ürün Adı", altBaslik, firca, 10, y);
+            e.Graphics.DrawString("Adet", altBaslik, firca, 180, y);
+            e.Graphics.DrawString("Tutar", altBaslik, firca, 230, y);
+            y += h;
+
+            decimal genelToplam = 0;
+            foreach (var item in _sepet)
+            {
+                e.Graphics.DrawString(item.IlacAdi, icerik, firca, 10, y);
+                e.Graphics.DrawString(item.Adet.ToString(), icerik, firca, 190, y);
+                e.Graphics.DrawString(item.Toplam.ToString("C2"), icerik, firca, 230, y);
+                genelToplam += item.Toplam;
+                y += h;
+            }
+
+            e.Graphics.DrawString("------------------------------------------------", icerik, firca, 10, y); y += h;
+            e.Graphics.DrawString($"TOPLAM: {genelToplam:C2}", baslikFont, firca, 150, y);
+        }
+
+        // ============================================================
+        // 5. YARDIMCI VE KONTROL METODLARI
+        // ============================================================
+        bool EtkilesimKontrol(string yeniIlac)
+        {
+            if (_sepet.Count == 0) return true;
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                foreach (var item in _sepet)
+                {
+                    SqlCommand cmd = new SqlCommand("SELECT RiskMesaji FROM Etkilesimler WHERE (Ilac1=@p1 AND Ilac2=@p2) OR (Ilac1=@p2 AND Ilac2=@p1)", conn);
+                    cmd.Parameters.AddWithValue("@p1", yeniIlac.Trim());
+                    cmd.Parameters.AddWithValue("@p2", item.IlacAdi.Trim());
+                    object sonuc = cmd.ExecuteScalar();
+                    if (sonuc != null)
+                    {
+                        string risk = sonuc.ToString();
+                        conn.Close();
+                        DialogResult cvp = MessageBox.Show($"⚠️ RİSK: {item.IlacAdi} ve {yeniIlac} birlikte kullanılmamalı!\nSebep: {risk}\n\nYine de ekle?", "Etkileşim Uyarısı", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        return (cvp == DialogResult.Yes);
+                    }
+                }
+                conn.Close();
+            }
+            catch { }
+            return true;
+        }
+
+        bool StokYeterliMi(string ilacAdi, int istenenAdet)
+        {
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                SqlCommand cmd = new SqlCommand("Select adet From Ilaclar where ilacAdı=@p1 AND KullaniciID=@uid", conn);
+                cmd.Parameters.AddWithValue("@p1", ilacAdi);
+                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                object sonuc = cmd.ExecuteScalar();
+                conn.Close();
+                int dbStok = (sonuc != null) ? Convert.ToInt32(sonuc) : 0;
+                var sepetteki = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
+                int sepettekiAdet = sepetteki != null ? sepetteki.Adet : 0;
+
+                if (dbStok < (istenenAdet + sepettekiAdet))
+                {
+                    MessageBox.Show($"Stok Yetersiz! Eldeki: {dbStok}, Sepette: {sepettekiAdet}", "Hata");
+                    return false;
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
         void listele() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select * From Hareketler WHERE KullaniciID=" + MevcutKullanici.Id + " ORDER BY tarih DESC", bgl.baglanti()); da.Fill(dt); gridControl1.DataSource = dt; gridView1.BestFitColumns(); } catch { } }
         void ilacListesiGetir() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti()); da.Fill(dt); lueIlac.Properties.DataSource = dt; lueIlac.Properties.ValueMember = "ilacAdı"; lueIlac.Properties.DisplayMember = "ilacAdı"; } catch { } }
         void temizle() { lueIlac.EditValue = null; txtTc.Text = ""; txtHastaAdi.Text = ""; txtAdet.Text = ""; txtFiyat.Text = ""; txtToplam.Text = ""; }
@@ -370,5 +495,10 @@ namespace Eczane_Otomasyonu
         private void txtTc_Leave(object sender, EventArgs e) { if (txtTc.Text.Length == 11) { try { SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1 AND KullaniciID=@uid", bgl.baglanti()); komut.Parameters.AddWithValue("@p1", txtTc.Text); komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); SqlDataReader dr = komut.ExecuteReader(); if (dr.Read()) { txtHastaAdi.Text = dr[0].ToString(); } bgl.baglanti().Close(); } catch { } } }
         private void txtAdet_TextChanged(object sender, EventArgs e) { try { decimal f = decimal.Parse(txtFiyat.Text); int a = int.Parse(txtAdet.Text); txtToplam.Text = (f * a).ToString("N2"); } catch { } }
         private void txtFiyat_TextChanged(object sender, EventArgs e) { txtAdet_TextChanged(null, null); }
+
+        private void txtBarkod_EditValueChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

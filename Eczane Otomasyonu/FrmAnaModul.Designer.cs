@@ -62,6 +62,7 @@
             this.flowSohbet = new System.Windows.Forms.FlowLayoutPanel();
             this.lstBildirimler = new DevExpress.XtraEditors.ListBoxControl();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
             this.btnGonder = new DevExpress.XtraEditors.SimpleButton();
             this.txtMesaj = new DevExpress.XtraEditors.TextEdit();
@@ -75,7 +76,6 @@
             this.txtIsletmeTel = new DevExpress.XtraEditors.TextEdit();
             this.txtIsletmeSahip = new DevExpress.XtraEditors.TextEdit();
             this.txtIsletmeAdi = new DevExpress.XtraEditors.TextEdit();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabbedMdiManager1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlTahmin)).BeginInit();
@@ -385,6 +385,19 @@
             this.panelControl1.TabIndex = 8;
             this.panelControl1.Visible = false;
             // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.labelControl3.ImageOptions.Alignment = System.Drawing.ContentAlignment.MiddleRight;
+            this.labelControl3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("labelControl3.ImageOptions.SvgImage")));
+            this.labelControl3.Location = new System.Drawing.Point(97, 5);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(226, 32);
+            this.labelControl3.TabIndex = 19;
+            this.labelControl3.Text = "YARDIMCI ASİSTANINIZ";
+            // 
             // simpleButton1
             // 
             this.simpleButton1.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("simpleButton1.ImageOptions.Image")));
@@ -527,16 +540,6 @@
             this.txtIsletmeAdi.Size = new System.Drawing.Size(283, 28);
             this.txtIsletmeAdi.TabIndex = 0;
             // 
-            // labelControl3
-            // 
-            this.labelControl3.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(132, 5);
-            this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(178, 21);
-            this.labelControl3.TabIndex = 19;
-            this.labelControl3.Text = "YARDIMCI ASİSTANINIZ";
-            // 
             // FrmAnaModul
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -566,7 +569,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.lstBildirimler)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
             this.panelControl1.ResumeLayout(false);
-            this.panelControl1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtMesaj.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pnlAyarlar)).EndInit();
             this.pnlAyarlar.ResumeLayout(false);
