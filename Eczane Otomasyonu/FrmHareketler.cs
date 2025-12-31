@@ -118,7 +118,7 @@ namespace Eczane_Otomasyonu
             lueIlac.EditValue = null;
             txtAdet.Text = "";
             txtFiyat.Text = "";
-            txtToplam.Text = "";
+            
         }
 
         void SepetGuncelle()
@@ -242,6 +242,53 @@ namespace Eczane_Otomasyonu
             }
         }
 
+        // FrmHareketler.cs içine eklenecek:
+
+        // --- DIŞARIDAN (CHAT'TEN) GELEN SATIŞ EMRİNİ UYGULA ---
+        public void ChattenSatisYap(string ilacAdi, int adet)
+        {
+            // 1. İlaç Adı ve Adeti Kutulara Doldur
+            // (Böylece kullanıcı görüp müdahale edebilir)
+            lueIlac.EditValue = null; // Önce temizle
+                                      // LookUpEdit'te texti set etmek bazen yetmez, listeden seçtirmek gerekebilir
+                                      // Ama şimdilik Text olarak gösterelim veya sepete direkt atalım.
+
+            // EN İYİSİ: DİREKT SEPETE ATMAK
+
+            // 1. Stok ve Etkileşim Kontrolü
+            if (!EtkilesimKontrol(ilacAdi)) return;
+            if (!StokYeterliMi(ilacAdi, adet)) return;
+
+            // 2. Fiyatı Bul
+            decimal fiyat = 0;
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                SqlCommand cmd = new SqlCommand("SELECT fiyat FROM Ilaclar WHERE ilacAdı=@p1 AND KullaniciID=@uid", conn);
+                cmd.Parameters.AddWithValue("@p1", ilacAdi);
+                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                object sonuc = cmd.ExecuteScalar();
+                conn.Close();
+                if (sonuc != null) fiyat = Convert.ToDecimal(sonuc);
+            }
+            catch { }
+
+            // 3. Sepete Ekle
+            var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
+            if (mevcut != null)
+            {
+                mevcut.Adet += adet;
+            }
+            else
+            {
+                _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = adet, BirimFiyat = fiyat });
+            }
+
+            // 4. Ekranı Güncelle
+            SepetGuncelle();
+            MessageBox.Show($"🛒 {adet} adet {ilacAdi} satış ekranına eklendi!", "Asistan");
+        }
         void RecetedekiIlaclariBul(string metin)
         {
             metin = metin.ToLower(); // Karşılaştırma için küçült
@@ -490,10 +537,10 @@ namespace Eczane_Otomasyonu
 
         void listele() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select * From Hareketler WHERE KullaniciID=" + MevcutKullanici.Id + " ORDER BY tarih DESC", bgl.baglanti()); da.Fill(dt); gridControl1.DataSource = dt; gridView1.BestFitColumns(); } catch { } }
         void ilacListesiGetir() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti()); da.Fill(dt); lueIlac.Properties.DataSource = dt; lueIlac.Properties.ValueMember = "ilacAdı"; lueIlac.Properties.DisplayMember = "ilacAdı"; } catch { } }
-        void temizle() { lueIlac.EditValue = null; txtTc.Text = ""; txtHastaAdi.Text = ""; txtAdet.Text = ""; txtFiyat.Text = ""; txtToplam.Text = ""; }
+        void temizle() { lueIlac.EditValue = null; txtTc.Text = ""; txtHastaAdi.Text = ""; txtAdet.Text = ""; txtFiyat.Text = ""; }
         private void lueIlac_EditValueChanged(object sender, EventArgs e) { if (lueIlac.EditValue != null) { object val = lueIlac.Properties.GetDataSourceRowByKeyValue(lueIlac.EditValue); DataRowView row = val as DataRowView; if (row != null) txtFiyat.Text = row["fiyat"].ToString(); } }
         private void txtTc_Leave(object sender, EventArgs e) { if (txtTc.Text.Length == 11) { try { SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1 AND KullaniciID=@uid", bgl.baglanti()); komut.Parameters.AddWithValue("@p1", txtTc.Text); komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); SqlDataReader dr = komut.ExecuteReader(); if (dr.Read()) { txtHastaAdi.Text = dr[0].ToString(); } bgl.baglanti().Close(); } catch { } } }
-        private void txtAdet_TextChanged(object sender, EventArgs e) { try { decimal f = decimal.Parse(txtFiyat.Text); int a = int.Parse(txtAdet.Text); txtToplam.Text = (f * a).ToString("N2"); } catch { } }
+        private void txtAdet_TextChanged(object sender, EventArgs e) { try { decimal f = decimal.Parse(txtFiyat.Text); int a = int.Parse(txtAdet.Text); } catch { } }
         private void txtFiyat_TextChanged(object sender, EventArgs e) { txtAdet_TextChanged(null, null); }
 
         private void txtBarkod_EditValueChanged(object sender, EventArgs e)

@@ -34,7 +34,6 @@ namespace Eczane_Otomasyonu
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.btnSatisYap = new DevExpress.XtraEditors.SimpleButton();
-            this.txtToplam = new DevExpress.XtraEditors.TextEdit();
             this.gridSepet = new DevExpress.XtraGrid.GridControl();
             this.gridView2 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.behaviorManager1 = new DevExpress.Utils.Behaviors.BehaviorManager(this.components);
@@ -46,13 +45,12 @@ namespace Eczane_Otomasyonu
             this.txtBarkod = new DevExpress.XtraEditors.TextEdit();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.txtTc = new DevExpress.XtraEditors.TextEdit();
             this.txtFiyat = new DevExpress.XtraEditors.TextEdit();
             this.txtAdet = new DevExpress.XtraEditors.TextEdit();
             this.txtHastaAdi = new DevExpress.XtraEditors.TextEdit();
-            this.txtTc = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtToplam.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.behaviorManager1)).BeginInit();
@@ -62,10 +60,10 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtBarkod.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -98,22 +96,6 @@ namespace Eczane_Otomasyonu
             this.btnSatisYap.TabIndex = 7;
             this.btnSatisYap.Text = "SATIŞI ONAYLA";
             this.btnSatisYap.Click += new System.EventHandler(this.btnSatisYap_Click);
-            // 
-            // txtToplam
-            // 
-            this.txtToplam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtToplam.EditValue = "TOPLAM :";
-            this.txtToplam.Enabled = false;
-            this.txtToplam.Location = new System.Drawing.Point(1148, 524);
-            this.txtToplam.Name = "txtToplam";
-            this.txtToplam.Properties.Appearance.BackColor = System.Drawing.Color.White;
-            this.txtToplam.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtToplam.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txtToplam.Properties.Appearance.Options.UseBackColor = true;
-            this.txtToplam.Properties.Appearance.Options.UseFont = true;
-            this.txtToplam.Properties.Appearance.Options.UseForeColor = true;
-            this.txtToplam.Size = new System.Drawing.Size(122, 28);
-            this.txtToplam.TabIndex = 5;
             // 
             // gridSepet
             // 
@@ -231,6 +213,16 @@ namespace Eczane_Otomasyonu
             this.groupControl1.Size = new System.Drawing.Size(411, 441);
             this.groupControl1.TabIndex = 1;
             // 
+            // txtTc
+            // 
+            this.txtTc.Location = new System.Drawing.Point(17, 372);
+            this.txtTc.Name = "txtTc";
+            this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtTc.Properties.Appearance.Options.UseFont = true;
+            this.txtTc.Properties.NullValuePrompt = "TC NO :";
+            this.txtTc.Size = new System.Drawing.Size(183, 28);
+            this.txtTc.TabIndex = 19;
+            // 
             // txtFiyat
             // 
             this.txtFiyat.Location = new System.Drawing.Point(5, 202);
@@ -263,22 +255,11 @@ namespace Eczane_Otomasyonu
             this.txtHastaAdi.Size = new System.Drawing.Size(183, 28);
             this.txtHastaAdi.TabIndex = 15;
             // 
-            // txtTc
-            // 
-            this.txtTc.Location = new System.Drawing.Point(17, 372);
-            this.txtTc.Name = "txtTc";
-            this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtTc.Properties.Appearance.Options.UseFont = true;
-            this.txtTc.Properties.NullValuePrompt = "TC NO :";
-            this.txtTc.Size = new System.Drawing.Size(183, 28);
-            this.txtTc.TabIndex = 19;
-            // 
             // FrmHareketler
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1488, 568);
-            this.Controls.Add(this.txtToplam);
             this.Controls.Add(this.btnSatisYap);
             this.Controls.Add(this.gridSepet);
             this.Controls.Add(this.groupControl1);
@@ -287,7 +268,6 @@ namespace Eczane_Otomasyonu
             this.Text = "FrmHareketler";
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtToplam.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.behaviorManager1)).EndInit();
@@ -298,10 +278,10 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
             this.groupControl1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -311,7 +291,6 @@ namespace Eczane_Otomasyonu
         private DevExpress.XtraGrid.GridControl gridControl1;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private DevExpress.XtraEditors.SimpleButton btnSatisYap;
-        private DevExpress.XtraEditors.TextEdit txtToplam;
         private DevExpress.XtraGrid.GridControl gridSepet;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView2;
         private DevExpress.Utils.Behaviors.BehaviorManager behaviorManager1;

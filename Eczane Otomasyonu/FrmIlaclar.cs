@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Eczane_Otomasyonu
 {
@@ -291,5 +292,63 @@ namespace Eczane_Otomasyonu
                 MessageBox.Show($"'{gelenAd}' stokta yok. Kod ve Fiyat giriniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+        private async void btnEtkenMaddeGuncelle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                SqlCommand cmd = new SqlCommand("SELECT ilacAdı FROM Ilaclar WHERE (EtkenMadde IS NULL OR EtkenMadde='') AND KullaniciID=@uid", conn);
+                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                if (dt.Rows.Count == 0) { MessageBox.Show("Güncellenecek ilaç yok."); return; }
+
+                // Kullanıcıyı uyaralım
+                MessageBox.Show($"{dt.Rows.Count} adet ilaç güncellenecek.\nKota aşmaması için her ilaç arasında 4 saniye beklenecek.\nBu işlem biraz uzun sürebilir, lütfen programı kapatmayın.", "Yavaş Mod Başladı");
+
+                int sayac = 0;
+                foreach (DataRow dr in dt.Rows)
+                {
+                    sayac++;
+                    string ilacAdi = dr["ilacAdı"].ToString();
+
+                    // Formun başlığına durumu yazalım ki dondu sanmasınlar
+                    this.Text = $"Güncelleniyor: {sayac} / {dt.Rows.Count} - {ilacAdi}";
+
+                    // 1. İSTEĞİ GÖNDER
+                    string etkenMadde = await GeminiAsistani.Yorumla($"Sadece '{ilacAdi}' ilacının etken maddesini 1-2 kelime ile yaz. Başka bir şey yazma.");
+
+                    etkenMadde = etkenMadde.Replace("Etken maddesi:", "").Trim();
+                    if (etkenMadde.Length > 99) etkenMadde = etkenMadde.Substring(0, 99);
+
+                    // 2. KAYDET
+                    SqlCommand cmdUpdate = new SqlCommand("UPDATE Ilaclar SET EtkenMadde=@etken WHERE ilacAdı=@ad AND KullaniciID=@uid", conn);
+                    cmdUpdate.Parameters.AddWithValue("@etken", etkenMadde);
+                    cmdUpdate.Parameters.AddWithValue("@ad", ilacAdi);
+                    cmdUpdate.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                    cmdUpdate.ExecuteNonQuery();
+
+                    // 🛑 FREN SİSTEMİ (ÇOK ÖNEMLİ!)
+                    // Her işlemden sonra 4000 milisaniye (4 saniye) bekle.
+                    // Bu sayede dakikada 15 istek sınırını aşmazsın.
+                    await Task.Delay(4000);
+                }
+
+                conn.Close();
+                this.Text = "İlaçlar"; // Başlığı düzelt
+                MessageBox.Show("Tüm güncellemeler bitti! Kotanız güvende. ✅", "Tamamlandı");
+                listele();
+            }
+            catch (Exception ex)
+            {
+                this.Text = "İlaçlar";
+                MessageBox.Show("Hata: " + ex.Message);
+            }
+        }
     }
-}
+    }

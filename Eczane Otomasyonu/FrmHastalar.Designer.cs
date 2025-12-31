@@ -102,7 +102,7 @@
             // cmbGuvence
             // 
             this.cmbGuvence.EditValue = "";
-            this.cmbGuvence.Location = new System.Drawing.Point(19, 253);
+            this.cmbGuvence.Location = new System.Drawing.Point(43, 237);
             this.cmbGuvence.Name = "cmbGuvence";
             this.cmbGuvence.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.cmbGuvence.Properties.Appearance.Options.UseFont = true;
@@ -117,7 +117,7 @@
             "YOK "});
             this.cmbGuvence.Properties.NullValuePrompt = "GÜVENCE";
             this.cmbGuvence.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cmbGuvence.Size = new System.Drawing.Size(100, 28);
+            this.cmbGuvence.Size = new System.Drawing.Size(153, 28);
             this.cmbGuvence.TabIndex = 14;
             // 
             // btnGuncelle

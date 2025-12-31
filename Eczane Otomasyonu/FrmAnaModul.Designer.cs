@@ -366,7 +366,7 @@
             // 
             // lstBildirimler
             // 
-            this.lstBildirimler.Location = new System.Drawing.Point(363, 850);
+            this.lstBildirimler.Location = new System.Drawing.Point(449, 839);
             this.lstBildirimler.Name = "lstBildirimler";
             this.lstBildirimler.Size = new System.Drawing.Size(403, 120);
             this.lstBildirimler.TabIndex = 13;
