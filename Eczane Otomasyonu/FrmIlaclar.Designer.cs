@@ -29,20 +29,20 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DevExpress.DataAccess.Sql.SelectQuery selectQuery1 = new DevExpress.DataAccess.Sql.SelectQuery();
-            DevExpress.DataAccess.Sql.Column column1 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression1 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Table table1 = new DevExpress.DataAccess.Sql.Table();
-            DevExpress.DataAccess.Sql.Column column2 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression2 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column3 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression3 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column4 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression4 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column5 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression5 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column6 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression6 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.SelectQuery selectQuery3 = new DevExpress.DataAccess.Sql.SelectQuery();
+            DevExpress.DataAccess.Sql.Column column13 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression13 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Table table3 = new DevExpress.DataAccess.Sql.Table();
+            DevExpress.DataAccess.Sql.Column column14 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression14 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column15 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression15 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column16 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression16 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column17 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression17 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column18 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression18 = new DevExpress.DataAccess.Sql.ColumnExpression();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmIlaclar));
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
@@ -70,7 +70,6 @@
             this.colfiyat = new DevExpress.XtraGrid.Columns.GridColumn();
             this.coladet = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colresim = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picResim.Properties)).BeginInit();
@@ -87,36 +86,36 @@
             // 
             this.sqlDataSource1.ConnectionName = "yusuf.Eczane_Otomasyonu.dbo1";
             this.sqlDataSource1.Name = "sqlDataSource1";
-            columnExpression1.ColumnName = "sıraNo";
-            table1.MetaSerializable = "<Meta X=\"30\" Y=\"30\" Width=\"125\" Height=\"183\" />";
-            table1.Name = "ılaclar";
-            columnExpression1.Table = table1;
-            column1.Expression = columnExpression1;
-            columnExpression2.ColumnName = "ilacKodu";
-            columnExpression2.Table = table1;
-            column2.Expression = columnExpression2;
-            columnExpression3.ColumnName = "ilacAdı";
-            columnExpression3.Table = table1;
-            column3.Expression = columnExpression3;
-            columnExpression4.ColumnName = "fiyat";
-            columnExpression4.Table = table1;
-            column4.Expression = columnExpression4;
-            columnExpression5.ColumnName = "adet";
-            columnExpression5.Table = table1;
-            column5.Expression = columnExpression5;
-            columnExpression6.ColumnName = "resim";
-            columnExpression6.Table = table1;
-            column6.Expression = columnExpression6;
-            selectQuery1.Columns.Add(column1);
-            selectQuery1.Columns.Add(column2);
-            selectQuery1.Columns.Add(column3);
-            selectQuery1.Columns.Add(column4);
-            selectQuery1.Columns.Add(column5);
-            selectQuery1.Columns.Add(column6);
-            selectQuery1.Name = "ılaclar";
-            selectQuery1.Tables.Add(table1);
+            columnExpression13.ColumnName = "sıraNo";
+            table3.MetaSerializable = "<Meta X=\"30\" Y=\"30\" Width=\"125\" Height=\"183\" />";
+            table3.Name = "ılaclar";
+            columnExpression13.Table = table3;
+            column13.Expression = columnExpression13;
+            columnExpression14.ColumnName = "ilacKodu";
+            columnExpression14.Table = table3;
+            column14.Expression = columnExpression14;
+            columnExpression15.ColumnName = "ilacAdı";
+            columnExpression15.Table = table3;
+            column15.Expression = columnExpression15;
+            columnExpression16.ColumnName = "fiyat";
+            columnExpression16.Table = table3;
+            column16.Expression = columnExpression16;
+            columnExpression17.ColumnName = "adet";
+            columnExpression17.Table = table3;
+            column17.Expression = columnExpression17;
+            columnExpression18.ColumnName = "resim";
+            columnExpression18.Table = table3;
+            column18.Expression = columnExpression18;
+            selectQuery3.Columns.Add(column13);
+            selectQuery3.Columns.Add(column14);
+            selectQuery3.Columns.Add(column15);
+            selectQuery3.Columns.Add(column16);
+            selectQuery3.Columns.Add(column17);
+            selectQuery3.Columns.Add(column18);
+            selectQuery3.Name = "ılaclar";
+            selectQuery3.Tables.Add(table3);
             this.sqlDataSource1.Queries.AddRange(new DevExpress.DataAccess.Sql.SqlQuery[] {
-            selectQuery1});
+            selectQuery3});
             this.sqlDataSource1.ResultSchemaSerializable = resources.GetString("sqlDataSource1.ResultSchemaSerializable");
             // 
             // groupControl1
@@ -360,21 +359,11 @@
             this.colresim.Visible = true;
             this.colresim.VisibleIndex = 5;
             // 
-            // simpleButton1
-            // 
-            this.simpleButton1.Location = new System.Drawing.Point(366, 203);
-            this.simpleButton1.Name = "simpleButton1";
-            this.simpleButton1.Size = new System.Drawing.Size(75, 23);
-            this.simpleButton1.TabIndex = 3;
-            this.simpleButton1.Text = "simpleButton1";
-            this.simpleButton1.Click += new System.EventHandler(this.btnEtkenMaddeGuncelle_Click);
-            // 
             // FrmIlaclar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1918, 1048);
-            this.Controls.Add(this.simpleButton1);
             this.Controls.Add(this.gridControl1);
             this.Controls.Add(this.groupControl1);
             this.Name = "FrmIlaclar";
@@ -422,6 +411,5 @@
         private DevExpress.XtraEditors.LabelControl labelControl6;
         private DevExpress.XtraEditors.SimpleButton btnResimSec;
         private DevExpress.XtraEditors.PictureEdit picResim;
-        private DevExpress.XtraEditors.SimpleButton simpleButton1;
     }
 }

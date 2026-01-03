@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevExpress.XtraCharts.Series series7 = new DevExpress.XtraCharts.Series();
-            DevExpress.XtraCharts.PieSeriesView pieSeriesView4 = new DevExpress.XtraCharts.PieSeriesView();
-            DevExpress.XtraCharts.ChartTitle chartTitle7 = new DevExpress.XtraCharts.ChartTitle();
-            DevExpress.XtraCharts.XYDiagram xyDiagram4 = new DevExpress.XtraCharts.XYDiagram();
-            DevExpress.XtraCharts.Series series8 = new DevExpress.XtraCharts.Series();
-            DevExpress.XtraCharts.ChartTitle chartTitle8 = new DevExpress.XtraCharts.ChartTitle();
+            DevExpress.XtraCharts.Series series1 = new DevExpress.XtraCharts.Series();
+            DevExpress.XtraCharts.PieSeriesView pieSeriesView1 = new DevExpress.XtraCharts.PieSeriesView();
+            DevExpress.XtraCharts.ChartTitle chartTitle1 = new DevExpress.XtraCharts.ChartTitle();
+            DevExpress.XtraCharts.XYDiagram xyDiagram1 = new DevExpress.XtraCharts.XYDiagram();
+            DevExpress.XtraCharts.Series series2 = new DevExpress.XtraCharts.Series();
+            DevExpress.XtraCharts.ChartTitle chartTitle2 = new DevExpress.XtraCharts.ChartTitle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmRaporlar));
             this.chartIlaclar = new DevExpress.XtraCharts.ChartControl();
             this.chartCiro = new DevExpress.XtraCharts.ChartControl();
@@ -50,11 +50,11 @@
             this.groupHasta = new DevExpress.XtraEditors.GroupControl();
             this.groupStok = new DevExpress.XtraEditors.GroupControl();
             ((System.ComponentModel.ISupportInitialize)(this.chartIlaclar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(series7)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(pieSeriesView4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(series1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(pieSeriesView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCiro)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(xyDiagram4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(series8)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(xyDiagram1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(series2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateBaslangic.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateBaslangic.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateBitis.Properties)).BeginInit();
@@ -74,38 +74,38 @@
             this.chartIlaclar.Dock = System.Windows.Forms.DockStyle.Top;
             this.chartIlaclar.Location = new System.Drawing.Point(0, 0);
             this.chartIlaclar.Name = "chartIlaclar";
-            series7.Name = "Series 1";
-            series7.SeriesID = 1;
-            series7.View = pieSeriesView4;
+            series1.Name = "Series 1";
+            series1.SeriesID = 1;
+            series1.View = pieSeriesView1;
             this.chartIlaclar.SeriesSerializable = new DevExpress.XtraCharts.Series[] {
-        series7};
+        series1};
             this.chartIlaclar.Size = new System.Drawing.Size(1918, 200);
             this.chartIlaclar.TabIndex = 0;
-            chartTitle7.DXFont = new DevExpress.Drawing.DXFont("Tahoma", 28F, DevExpress.Drawing.DXFontStyle.Bold);
-            chartTitle7.Text = " En Çok Satan 5 İlaç";
-            chartTitle7.TitleID = 0;
+            chartTitle1.DXFont = new DevExpress.Drawing.DXFont("Tahoma", 28F, DevExpress.Drawing.DXFontStyle.Bold);
+            chartTitle1.Text = " En Çok Satan 5 İlaç";
+            chartTitle1.TitleID = 0;
             this.chartIlaclar.Titles.AddRange(new DevExpress.XtraCharts.ChartTitle[] {
-            chartTitle7});
+            chartTitle1});
             // 
             // chartCiro
             // 
-            xyDiagram4.AxisX.VisibleInPanesSerializable = "-1";
-            xyDiagram4.AxisY.VisibleInPanesSerializable = "-1";
-            this.chartCiro.Diagram = xyDiagram4;
+            xyDiagram1.AxisX.VisibleInPanesSerializable = "-1";
+            xyDiagram1.AxisY.VisibleInPanesSerializable = "-1";
+            this.chartCiro.Diagram = xyDiagram1;
             this.chartCiro.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.chartCiro.Location = new System.Drawing.Point(0, 848);
             this.chartCiro.Name = "chartCiro";
-            series8.Name = "Series 1";
-            series8.SeriesID = 0;
+            series2.Name = "Series 1";
+            series2.SeriesID = 0;
             this.chartCiro.SeriesSerializable = new DevExpress.XtraCharts.Series[] {
-        series8};
+        series2};
             this.chartCiro.Size = new System.Drawing.Size(1918, 200);
             this.chartCiro.TabIndex = 1;
-            chartTitle8.DXFont = new DevExpress.Drawing.DXFont("Tahoma", 24F, DevExpress.Drawing.DXFontStyle.Bold);
-            chartTitle8.Text = "Günlük Ciro Grafiği";
-            chartTitle8.TitleID = 0;
+            chartTitle2.DXFont = new DevExpress.Drawing.DXFont("Tahoma", 24F, DevExpress.Drawing.DXFontStyle.Bold);
+            chartTitle2.Text = "Günlük Ciro Grafiği";
+            chartTitle2.TitleID = 0;
             this.chartCiro.Titles.AddRange(new DevExpress.XtraCharts.ChartTitle[] {
-            chartTitle8});
+            chartTitle2});
             // 
             // lblToplamHasta
             // 
@@ -161,6 +161,7 @@
             this.btnFiltrele.Size = new System.Drawing.Size(120, 32);
             this.btnFiltrele.TabIndex = 7;
             this.btnFiltrele.Text = "Filtrele";
+            this.btnFiltrele.Click += new System.EventHandler(this.btnFiltrele_Click);
             // 
             // btnPdf
             // 
@@ -243,11 +244,11 @@
             this.Name = "FrmRaporlar";
             this.Text = "FrmRaporlar";
             this.Load += new System.EventHandler(this.FrmRaporlar_Load);
-            ((System.ComponentModel.ISupportInitialize)(pieSeriesView4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(series7)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(pieSeriesView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(series1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartIlaclar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(xyDiagram4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(series8)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(xyDiagram1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(series2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCiro)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateBaslangic.Properties.CalendarTimeProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateBaslangic.Properties)).EndInit();

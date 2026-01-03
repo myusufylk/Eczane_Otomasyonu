@@ -16,7 +16,7 @@ namespace Eczane_Otomasyonu
         // =============================================================
         // DEĞİŞKENLER VE BAĞLANTILAR
         // =============================================================
-        List<SepetItem> _sepet = new List<SepetItem>(); // Manuel işlemler için sepet
+        List<SepetItem> _sepet = new List<SepetItem>();
         SqlBaglantisi bgl = new SqlBaglantisi();
         string secilenResimYolu = "";
 
@@ -36,6 +36,9 @@ namespace Eczane_Otomasyonu
             }
         }
 
+        // =============================================================
+        // 🛠️ KESİN ÇÖZÜM: PAINT EVENT (BOYAMA OLAYI)
+        // =============================================================
         private void FrmAnaModul_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
@@ -43,49 +46,67 @@ namespace Eczane_Otomasyonu
             PanelleriGizle();
             IsletmeBilgileriniGetir();
 
-            // Satış Tamamla Butonunu Güvenli Bağla
             var btnTamamla = this.Controls.Find("btnSatisTamamla", true);
             if (btnTamamla.Length > 0)
             {
                 btnTamamla[0].Click -= btnSatisTamamla_Click;
                 btnTamamla[0].Click += btnSatisTamamla_Click;
             }
+
+            // MdiClient'ı bul ve Boyama (Paint) olayını ele geçir.
+            // Bu kod, DevExpress ne yaparsa yapsın resmi zorla oraya çizer.
+            foreach (Control ctl in this.Controls)
+            {
+                if (ctl is MdiClient)
+                {
+                    MdiClient mdi = (MdiClient)ctl;
+
+                    // 1. Olay: Ekran her yenilendiğinde resmini çiz
+                    mdi.Paint += (s, p) =>
+                    {
+                        if (this.BackgroundImage != null)
+                        {
+                            // Resmi MdiClient'ın boyutlarına gerdirerek çiz
+                            p.Graphics.DrawImage(this.BackgroundImage, mdi.ClientRectangle);
+                        }
+                    };
+
+                    // 2. Olay: Pencere boyutu değişirse (Resize) tekrar boyamayı tetikle
+                    mdi.Resize += (s, r) => mdi.Invalidate();
+
+                    break;
+                }
+            }
         }
+        // =============================================================
 
         // =============================================================
         // 🔒 GÜVENLİ SOHBET SİSTEMİ (KOTA DOSTU)
         // =============================================================
 
-        // Enter Tuşu Kontrolü
         private void txtMesaj_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true; // "Dın" sesini engelle
-                btnGonder_Click(sender, e); // Butona yönlendir
+                e.SuppressKeyPress = true;
+                btnGonder_Click(sender, e);
             }
         }
 
-        // 🚀 ANA KOMUT MERKEZİ (ROUTER)
         private async void btnGonder_Click(object sender, EventArgs e)
         {
             string mesaj = txtMesaj.Text.Trim();
             if (string.IsNullOrEmpty(mesaj)) return;
 
-            // 🛑 1. GÜVENLİK: Butonları kilitle (Seri tıklamayı engeller)
             txtMesaj.Enabled = false;
             btnGonder.Enabled = false;
 
-            // Kullanıcı mesajını ekrana yaz
             MesajEkle("👤 SİZ: " + mesaj, true);
             txtMesaj.Text = "";
             if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
 
             string kucukMesaj = mesaj.ToLower();
 
-            // --- YÖNLENDİRMELER ---
-
-            // Temizle
             if (kucukMesaj.Contains("yeni hasta") || kucukMesaj.Contains("temizle"))
             {
                 _sepet.Clear(); SepetGuncelle();
@@ -93,35 +114,27 @@ namespace Eczane_Otomasyonu
                 KilidiAc(); return;
             }
 
-            // STOK GİRİŞİ (FrmIlaclar açar)
-            // "stok ekle" veya "tanımla" denirse çalışır
             if ((kucukMesaj.Contains("stok") || kucukMesaj.Contains("tanımla")) && kucukMesaj.Contains("ekle"))
             {
                 KomutEkle(mesaj);
                 KilidiAc(); return;
             }
 
-            // SATIŞ İŞLEMİ (FrmHareketler açar)
-            // "sat", "ver", "ekle" denirse çalışır (İçinde "stok" yoksa)
             if (kucukMesaj.Contains("sat") || kucukMesaj.Contains("ver") || kucukMesaj.Contains("düş") || kucukMesaj.Contains("ekle"))
             {
                 KomutSat(mesaj);
                 KilidiAc(); return;
             }
 
-            // RAPOR VE BİLGİ (SQL'den okur, Yapay Zekaya gitmez)
             if (kucukMesaj.Contains("ciro") || kucukMesaj.Contains("rapor")) { KomutRapor(mesaj); KilidiAc(); return; }
             if (kucukMesaj.Contains("stok") || kucukMesaj.Contains("fiyat") || kucukMesaj.Contains("var mı")) { if (KomutBilgi(mesaj)) { KilidiAc(); return; } }
 
-            // --- YAPAY ZEKA (Sadece sohbet ve analiz için) ---
             try
             {
                 MesajEkle("🤖 PharmAI yazıyor...", false);
-
                 string gonderilecekSoru = "";
                 if (kucukMesaj.Contains("analiz") || kucukMesaj.Contains("özet"))
                 {
-                    // Mağaza verisini SQL'den çekip YZ'ye yorumlat
                     string dukkanVerisi = MagazaVerileriniTopla();
                     gonderilecekSoru = $"{dukkanVerisi}\n\nSORU: Bu verilere göre eczanemin durumu nedir? Yönetici özeti geç.";
                 }
@@ -130,7 +143,6 @@ namespace Eczane_Otomasyonu
                     gonderilecekSoru = $"KULLANICI SORUSU: {mesaj}\n\n(Rolün: Eczacı Asistanı. Cevap kısa ve Türkçe olsun.)";
                 }
 
-                // Asistanı bekle
                 string cevap = await GeminiAsistani.Yorumla(gonderilecekSoru);
                 MesajEkle(cevap, false);
             }
@@ -140,7 +152,6 @@ namespace Eczane_Otomasyonu
             }
             finally
             {
-                // ✅ 2. GÜVENLİK: İşlem bitince kilitleri mutlaka aç
                 KilidiAc();
                 txtMesaj.Focus();
             }
@@ -148,24 +159,17 @@ namespace Eczane_Otomasyonu
             if (flowSohbet.Controls.Count > 0) flowSohbet.ScrollControlIntoView(flowSohbet.Controls[flowSohbet.Controls.Count - 1]);
         }
 
-        // Kilitleri Açan Yardımcı Metot
         void KilidiAc()
         {
             txtMesaj.Enabled = true;
             btnGonder.Enabled = true;
         }
 
-        // =============================================================
-        // 🛠️ YARDIMCI KOMUTLAR
-        // =============================================================
-
-        // SATIŞ KOMUTU (FrmHareketler Formuna Yönlendirir)
         void KomutSat(string mesaj)
         {
             string girilenIlacAdi = "";
             int adet = 1;
 
-            // Regex: İsim ve Adedi ayıkla
             var desenSayiOnce = System.Text.RegularExpressions.Regex.Match(mesaj, @"(\d+)\s*(?:adet|tane|kutu)?\s+(.+)\s+(?:sat|ver|düş|ekle)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             var desenIsimOnce = System.Text.RegularExpressions.Regex.Match(mesaj, @"(.+)\s+(\d+)\s*(?:adet|tane|kutu)?\s+(?:sat|ver|düş|ekle)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             var desenSadeceIsim = System.Text.RegularExpressions.Regex.Match(mesaj, @"(.+)\s+(?:sat|ver|düş|ekle)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
@@ -175,7 +179,6 @@ namespace Eczane_Otomasyonu
             else if (desenSadeceIsim.Success) { girilenIlacAdi = desenSadeceIsim.Groups[1].Value.Trim(); }
             else { MesajEkle("❌ İlaç adı anlaşılamadı.", false); return; }
 
-            // Veritabanından Tam İsmi Bul
             string tamIlacAdi = "";
             try
             {
@@ -198,7 +201,6 @@ namespace Eczane_Otomasyonu
             }
             catch { return; }
 
-            // FORMU AÇ VE EMRİ VER
             MesajEkle($"✅ '{tamIlacAdi}' bulundu. Satış ekranına gönderiliyor...", false);
 
             FrmHareketler frSatis = (FrmHareketler)Application.OpenForms["FrmHareketler"];
@@ -214,12 +216,9 @@ namespace Eczane_Otomasyonu
                 frSatis.Activate();
             }
 
-            // Satış formundaki özel metodu çalıştır
-            // NOT: FrmHareketler.cs içinde "public void ChattenSatisYap(string ad, int adet)" metodu olmalı!
             frSatis.ChattenSatisYap(tamIlacAdi, adet);
         }
 
-        // STOK EKLEME KOMUTU (FrmIlaclar Formunu Açar)
         void KomutEkle(string mesaj)
         {
             int adet = 1;
@@ -272,7 +271,6 @@ namespace Eczane_Otomasyonu
             catch (Exception ex) { MesajEkle("Hata: " + ex.Message, false); }
         }
 
-        // BİLGİ KOMUTU (Fiyat/Stok sorulursa)
         bool KomutBilgi(string mesaj)
         {
             bool bulundu = false;
@@ -301,7 +299,6 @@ namespace Eczane_Otomasyonu
             return bulundu;
         }
 
-        // RAPOR KOMUTU
         void KomutRapor(string mesaj)
         {
             try
@@ -334,17 +331,12 @@ namespace Eczane_Otomasyonu
             catch (Exception ex) { MesajEkle($"⚠️ Rapor alınamadı. Hata: {ex.Message}", false); }
         }
 
-        // EKSTRA: Mağaza verilerini toplayıp AI'ye sunan metod
         string MagazaVerileriniTopla()
         {
             string veri = "GÜNCEL MAĞAZA VERİLERİ:\n";
             try
             {
                 SqlConnection conn = bgl.baglanti();
-                // if (conn.State == ConnectionState.Closed) conn.Open(); // Bağlantı sınıfınız zaten open açıyor olabilir, kontrol edin.
-
-                // DÜZELTME: "TOP 10" ekleyerek sadece en kritik 10 ilacı gönderiyoruz.
-                // Böylece kotanızı tüketmiyoruz.
                 SqlCommand cmdStok = new SqlCommand("SELECT TOP 10 ilacAdı, adet FROM Ilaclar WHERE adet < 20 AND KullaniciID=@uid ORDER BY adet ASC", conn);
                 cmdStok.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
@@ -352,17 +344,11 @@ namespace Eczane_Otomasyonu
                 veri += "--- AZALAN KRİTİK STOKLAR (İlk 10) ---\n";
                 while (dr.Read()) { veri += $"{dr[0]}: {dr[1]} adet kaldı.\n"; }
                 dr.Close();
-
-                // ... (Ciro kısmı aynı kalabilir) ...
                 conn.Close();
             }
             catch { }
             return veri;
         }
-
-        // =============================================================
-        // TASARIM VE DİĞER FONKSİYONLAR
-        // =============================================================
 
         private void MesajEkle(string mesaj, bool kullaniciMi)
         {
@@ -403,7 +389,6 @@ namespace Eczane_Otomasyonu
             return DateTime.Today;
         }
 
-        // Sepet Güncelleme (Manuel işlemler için)
         void SepetGuncelle()
         {
             var gridler = this.Controls.Find("gridSepet", true);
@@ -418,10 +403,8 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // Diğer Butonlar
         private void btnSatisTamamla_Click(object sender, EventArgs e)
         {
-            // Manuel sepeti veritabanına kaydetme kodları (Eski kodunun aynısı)
             if (_sepet.Count == 0) { MessageBox.Show("Sepet boş!"); return; }
             try
             {
@@ -452,7 +435,6 @@ namespace Eczane_Otomasyonu
             catch (Exception ex) { MessageBox.Show("Satış Hatası: " + ex.Message); }
         }
 
-        // Form açma ve gizleme işlemleri
         private void FrmAnaModul_MdiChildActivate(object sender, EventArgs e)
         {
             bool anaEkrandaMiyiz = (this.ActiveMdiChild == null);
@@ -494,7 +476,6 @@ namespace Eczane_Otomasyonu
             catch { }
         }
 
-        // Diğer olaylar (Eventler)
         private void btnRibbonYapayZeka_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (panelControl1.Visible) panelControl1.Visible = false;

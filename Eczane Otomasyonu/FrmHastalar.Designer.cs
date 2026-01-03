@@ -61,10 +61,10 @@
             // gridControl1
             // 
             this.gridControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.gridControl1.Location = new System.Drawing.Point(0, 848);
+            this.gridControl1.Location = new System.Drawing.Point(0, 718);
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
-            this.gridControl1.Size = new System.Drawing.Size(1918, 200);
+            this.gridControl1.Size = new System.Drawing.Size(1918, 330);
             this.gridControl1.TabIndex = 0;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -95,7 +95,7 @@
             this.groupControl1.Dock = System.Windows.Forms.DockStyle.Right;
             this.groupControl1.Location = new System.Drawing.Point(1679, 0);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(239, 848);
+            this.groupControl1.Size = new System.Drawing.Size(239, 718);
             this.groupControl1.TabIndex = 1;
             this.groupControl1.Text = "HASTA İŞLEMLERİ";
             // 

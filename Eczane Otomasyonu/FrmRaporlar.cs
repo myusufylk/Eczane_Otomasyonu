@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
-using DevExpress.XtraCharts; // Grafik kütüphanesi
+using DevExpress.XtraCharts;
 
 namespace Eczane_Otomasyonu
 {
@@ -31,62 +31,72 @@ namespace Eczane_Otomasyonu
             GrafikGorselAyarlari();
         }
 
-        // --- MERKEZİ GÜNCELLEME METODU ---
+        // --- MERKEZİ GÜNCELLEME METODU (DÜZELTİLDİ) ---
         void VerileriGuncelle()
         {
-            string t1 = dateBaslangic.DateTime.ToString("yyyy-MM-dd") + " 00:00:00";
-            string t2 = dateBitis.DateTime.ToString("yyyy-MM-dd") + " 23:59:59";
+            // Tarihleri stringe çevirmeden, DateTime nesnesi olarak hazırlıyoruz
+            // Başlangıç gününün sabahı (00:00:00)
+            DateTime t1 = dateBaslangic.DateTime.Date;
 
+            // Bitiş gününün gecesi (23:59:59) - Tam günü kapsaması için
+            DateTime t2 = dateBitis.DateTime.Date.AddDays(1).AddSeconds(-1);
+
+            // Metotlara artık DateTime gönderiyoruz
             enCokSatanlar(t1, t2);
             gunlukCiro(t1, t2);
             KartBilgileriniGetir(t1, t2);
         }
 
-        // --- 1. KPI KARTLARI (ÖZET BİLGİLER - SADECE BENİM VERİLERİM) ---
-        void KartBilgileriniGetir(string t1, string t2)
+        // --- 1. KPI KARTLARI ---
+        void KartBilgileriniGetir(DateTime t1, DateTime t2)
         {
             SqlConnection conn = bgl.baglanti();
             try
             {
-                // A) Toplam Ciro (Tarih + Kullanıcı Filtresi)
+                // A) Toplam Ciro
                 SqlCommand cmdCiro = new SqlCommand("SELECT SUM(toplamFiyat) FROM Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid", conn);
-                cmdCiro.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
-                cmdCiro.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                cmdCiro.Parameters.Add("@p1", SqlDbType.DateTime).Value = t1;
+                cmdCiro.Parameters.Add("@p2", SqlDbType.DateTime).Value = t2;
                 cmdCiro.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 object ciroSonuc = cmdCiro.ExecuteScalar();
-                lblToplamCiro.Text = (ciroSonuc != DBNull.Value) ? string.Format("{0:C2}", ciroSonuc) : "0,00 ₺";
+                lblToplamCiro.Text = (ciroSonuc != DBNull.Value && ciroSonuc != null) ? string.Format("{0:C2}", ciroSonuc) : "0,00 ₺";
 
-                // B) Toplam Hasta (Tarih + Kullanıcı Filtresi)
+                // B) Toplam Hasta
                 SqlCommand cmdHasta = new SqlCommand("SELECT COUNT(DISTINCT tcNo) FROM Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid", conn);
-                cmdHasta.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
-                cmdHasta.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                cmdHasta.Parameters.Add("@p1", SqlDbType.DateTime).Value = t1;
+                cmdHasta.Parameters.Add("@p2", SqlDbType.DateTime).Value = t2;
                 cmdHasta.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 object hastaSonuc = cmdHasta.ExecuteScalar();
                 lblToplamHasta.Text = (hastaSonuc != null) ? hastaSonuc.ToString() + " Kişi" : "0 Kişi";
 
-                // C) Toplam Stok (Sadece Benim Stoğum)
+                // C) Toplam Stok (Tarihten bağımsız genel stok)
                 SqlCommand cmdStok = new SqlCommand("SELECT SUM(adet) FROM Ilaclar WHERE KullaniciID=@uid", conn);
                 cmdStok.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 object stokSonuc = cmdStok.ExecuteScalar();
                 lblToplamStok.Text = (stokSonuc != null && stokSonuc != DBNull.Value) ? stokSonuc.ToString() + " Kutu" : "0 Kutu";
             }
-            catch (Exception ex) { MessageBox.Show("Kart Bilgisi Hatası: " + ex.Message); }
-            finally { conn.Close(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kart Bilgisi Hatası: " + ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
 
-        // --- 2. GRAFİK VERİLERİ (KULLANICI BAZLI) ---
-        void enCokSatanlar(string t1, string t2)
+        // --- 2. GRAFİK VERİLERİ ---
+        void enCokSatanlar(DateTime t1, DateTime t2)
         {
             SqlConnection conn = bgl.baglanti();
             try
             {
-                // Kullanıcı ID şartı eklendi
                 SqlCommand komut = new SqlCommand("Select Top 5 ilacAdi, SUM(adet) from Hareketler WHERE (ilacAdi IS NOT NULL AND ilacAdi <> '') AND (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid group by ilacAdi order by SUM(adet) desc", conn);
-                komut.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
-                komut.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                komut.Parameters.Add("@p1", SqlDbType.DateTime).Value = t1;
+                komut.Parameters.Add("@p2", SqlDbType.DateTime).Value = t2;
                 komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 SqlDataReader dr = komut.ExecuteReader();
@@ -100,19 +110,31 @@ namespace Eczane_Otomasyonu
                     chartIlaclar.Series[0].Points.AddPoint(dr[0].ToString(), int.Parse(dr[1].ToString()));
                 }
             }
-            catch { }
-            finally { conn.Close(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Pasta Grafik Hatası: " + ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
 
-        void gunlukCiro(string t1, string t2)
+        void gunlukCiro(DateTime t1, DateTime t2)
         {
             SqlConnection conn = bgl.baglanti();
             try
             {
-                // Kullanıcı ID şartı eklendi
-                SqlCommand komut = new SqlCommand("Select FORMAT(tarih, 'dd.MM.yyyy'), SUM(toplamFiyat) from Hareketler WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid group by FORMAT(tarih, 'dd.MM.yyyy') ORDER BY MIN(tarih)", conn);
-                komut.Parameters.AddWithValue("@p1", DateTime.Parse(t1));
-                komut.Parameters.AddWithValue("@p2", DateTime.Parse(t2));
+                // NOT: FORMAT fonksiyonu ve gruplama mantığı iyileştirildi.
+                // Tarihe göre sıralayıp, ekranda gün.ay.yıl formatında gösteriyoruz.
+                string sorgu = "Select FORMAT(tarih, 'dd.MM.yyyy'), SUM(toplamFiyat) from Hareketler " +
+                               "WHERE (tarih BETWEEN @p1 AND @p2) AND KullaniciID=@uid " +
+                               "GROUP BY FORMAT(tarih, 'dd.MM.yyyy'), CAST(tarih as Date) " +
+                               "ORDER BY CAST(tarih as Date)";
+
+                SqlCommand komut = new SqlCommand(sorgu, conn);
+                komut.Parameters.Add("@p1", SqlDbType.DateTime).Value = t1;
+                komut.Parameters.Add("@p2", SqlDbType.DateTime).Value = t2;
                 komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 SqlDataReader dr = komut.ExecuteReader();
@@ -120,11 +142,18 @@ namespace Eczane_Otomasyonu
                 chartCiro.Series[0].Points.Clear();
                 while (dr.Read())
                 {
-                    chartCiro.Series[0].Points.AddPoint(Convert.ToDateTime(dr[0]), Convert.ToDouble(dr[1]));
+                    // X ekseni: Tarih (String), Y ekseni: Tutar (Double)
+                    chartCiro.Series[0].Points.AddPoint(dr[0].ToString(), Convert.ToDouble(dr[1]));
                 }
             }
-            catch { }
-            finally { conn.Close(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ciro Grafik Hatası: " + ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
 
         // --- 3. BUTON OLAYLARI ---
@@ -157,34 +186,36 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // --- GÖRSEL AYARLAR (AYNI KALDI) ---
+        // --- GÖRSEL AYARLAR ---
         void GrafikGorselAyarlari()
         {
-            chartIlaclar.PaletteName = "Office 2013";
-            chartCiro.PaletteName = "Office 2013";
-
-            Series seriIlac = chartIlaclar.Series[0];
-            seriIlac.ChangeView(ViewType.Doughnut);
-
-            ((DoughnutSeriesLabel)seriIlac.Label).Position = PieSeriesLabelPosition.Outside;
-            ((DoughnutSeriesLabel)seriIlac.Label).TextColor = Color.Black;
-            ((DoughnutSeriesLabel)seriIlac.Label).BackColor = Color.Transparent;
-            ((DoughnutSeriesLabel)seriIlac.Label).Border.Visibility = DevExpress.Utils.DefaultBoolean.False;
-
-            chartIlaclar.AnimationStartMode = ChartAnimationMode.OnLoad;
-
-            if (chartCiro.Diagram is XYDiagram)
+            try
             {
-                XYDiagram diyagram = (XYDiagram)chartCiro.Diagram;
-                diyagram.AxisY.Label.TextPattern = "{V:C2}";
-                diyagram.AxisY.GridLines.Color = Color.LightGray;
+                chartIlaclar.PaletteName = "Office 2013";
+                chartCiro.PaletteName = "Office 2013";
 
-                // --- Hata Düzeltmesi (Önceki adımda yaptığımız) ---
-                diyagram.AxisY.GridLines.LineStyle.DashStyle = DevExpress.XtraCharts.DashStyle.Dash;
+                Series seriIlac = chartIlaclar.Series[0];
+                seriIlac.ChangeView(ViewType.Doughnut);
+
+                ((DoughnutSeriesLabel)seriIlac.Label).Position = PieSeriesLabelPosition.Outside;
+                ((DoughnutSeriesLabel)seriIlac.Label).TextColor = Color.Black;
+                ((DoughnutSeriesLabel)seriIlac.Label).BackColor = Color.Transparent;
+                ((DoughnutSeriesLabel)seriIlac.Label).Border.Visibility = DevExpress.Utils.DefaultBoolean.False;
+
+                chartIlaclar.AnimationStartMode = ChartAnimationMode.OnLoad;
+
+                if (chartCiro.Diagram is XYDiagram)
+                {
+                    XYDiagram diyagram = (XYDiagram)chartCiro.Diagram;
+                    diyagram.AxisY.Label.TextPattern = "{V:C2}";
+                    diyagram.AxisY.GridLines.Color = Color.LightGray;
+                    diyagram.AxisY.GridLines.LineStyle.DashStyle = DevExpress.XtraCharts.DashStyle.Dash;
+                }
+
+                chartCiro.ToolTipEnabled = DevExpress.Utils.DefaultBoolean.True;
+                chartCiro.AnimationStartMode = ChartAnimationMode.OnLoad;
             }
-
-            chartCiro.ToolTipEnabled = DevExpress.Utils.DefaultBoolean.True;
-            chartCiro.AnimationStartMode = ChartAnimationMode.OnLoad;
+            catch { }
         }
     }
-}
+}   

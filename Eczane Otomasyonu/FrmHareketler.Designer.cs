@@ -49,6 +49,7 @@ namespace Eczane_Otomasyonu
             this.txtFiyat = new DevExpress.XtraEditors.TextEdit();
             this.txtAdet = new DevExpress.XtraEditors.TextEdit();
             this.txtHastaAdi = new DevExpress.XtraEditors.TextEdit();
+            this.btnRiskAnaliz = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).BeginInit();
@@ -197,6 +198,7 @@ namespace Eczane_Otomasyonu
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.btnRiskAnaliz);
             this.groupControl1.Controls.Add(this.txtTc);
             this.groupControl1.Controls.Add(this.txtFiyat);
             this.groupControl1.Controls.Add(this.txtAdet);
@@ -215,7 +217,7 @@ namespace Eczane_Otomasyonu
             // 
             // txtTc
             // 
-            this.txtTc.Location = new System.Drawing.Point(17, 372);
+            this.txtTc.Location = new System.Drawing.Point(17, 393);
             this.txtTc.Name = "txtTc";
             this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtTc.Properties.Appearance.Options.UseFont = true;
@@ -247,13 +249,26 @@ namespace Eczane_Otomasyonu
             // txtHastaAdi
             // 
             this.txtHastaAdi.EditValue = "";
-            this.txtHastaAdi.Location = new System.Drawing.Point(215, 372);
+            this.txtHastaAdi.Location = new System.Drawing.Point(215, 393);
             this.txtHastaAdi.Name = "txtHastaAdi";
             this.txtHastaAdi.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtHastaAdi.Properties.Appearance.Options.UseFont = true;
             this.txtHastaAdi.Properties.NullValuePrompt = "HASTA ADI :";
             this.txtHastaAdi.Size = new System.Drawing.Size(183, 28);
             this.txtHastaAdi.TabIndex = 15;
+            // 
+            // btnRiskAnaliz
+            // 
+            this.btnRiskAnaliz.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnRiskAnaliz.Appearance.Options.UseFont = true;
+            this.btnRiskAnaliz.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightBottom;
+            this.btnRiskAnaliz.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnRiskAnaliz.ImageOptions.SvgImage")));
+            this.btnRiskAnaliz.Location = new System.Drawing.Point(17, 340);
+            this.btnRiskAnaliz.Name = "btnRiskAnaliz";
+            this.btnRiskAnaliz.Size = new System.Drawing.Size(389, 35);
+            this.btnRiskAnaliz.TabIndex = 20;
+            this.btnRiskAnaliz.Text = " Risk Analizi";
+            this.btnRiskAnaliz.Click += new System.EventHandler(this.btnRiskAnaliz_Click);
             // 
             // FrmHareketler
             // 
@@ -306,5 +321,6 @@ namespace Eczane_Otomasyonu
         private TextEdit txtFiyat;
         private TextEdit txtHastaAdi;
         private TextEdit txtTc;
+        private SimpleButton btnRiskAnaliz;
     }
 }

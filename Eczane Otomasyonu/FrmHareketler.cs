@@ -9,6 +9,10 @@ using System.Linq;
 using System.Windows.Forms;
 using Tesseract; // OCR Kütüphanesi
 using System.IO;   // Dosya işlemleri için
+using System.Net.Http; // API iletişimi için
+using System.Text;     // Encoding işlemleri için
+using System.Threading.Tasks; // Asenkron işlemler için
+using Newtonsoft.Json; // JSON işlemleri için (NuGet'ten indirmelisin)
 
 namespace Eczane_Otomasyonu
 {
@@ -58,6 +62,10 @@ namespace Eczane_Otomasyonu
                 // 📸 REÇETE OKU Butonu
                 var btnRecete = this.Controls.Find("btnReceteYukle", true);
                 if (btnRecete.Length > 0) { btnRecete[0].Click -= btnReceteYukle_Click; btnRecete[0].Click += btnReceteYukle_Click; }
+
+                // ⚠️ RİSK ANALİZİ Butonu (Yeni eklenen)
+                var btnRisk = this.Controls.Find("btnRiskAnaliz", true);
+                if (btnRisk.Length > 0) { btnRisk[0].Click -= btnRiskAnaliz_Click; btnRisk[0].Click += btnRiskAnaliz_Click; }
             }
             catch { }
         }
@@ -118,7 +126,6 @@ namespace Eczane_Otomasyonu
             lueIlac.EditValue = null;
             txtAdet.Text = "";
             txtFiyat.Text = "";
-            
         }
 
         void SepetGuncelle()
@@ -203,7 +210,7 @@ namespace Eczane_Otomasyonu
         }
 
         // ============================================================
-        // 3. OCR - FOTOĞRAFTAN REÇETE OKUMA (BURASI ARTIK HAZIR!)
+        // 3. OCR - FOTOĞRAFTAN REÇETE OKUMA
         // ============================================================
         private void btnReceteYukle_Click(object sender, EventArgs e)
         {
@@ -242,19 +249,9 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // FrmHareketler.cs içine eklenecek:
-
         // --- DIŞARIDAN (CHAT'TEN) GELEN SATIŞ EMRİNİ UYGULA ---
         public void ChattenSatisYap(string ilacAdi, int adet)
         {
-            // 1. İlaç Adı ve Adeti Kutulara Doldur
-            // (Böylece kullanıcı görüp müdahale edebilir)
-            lueIlac.EditValue = null; // Önce temizle
-                                      // LookUpEdit'te texti set etmek bazen yetmez, listeden seçtirmek gerekebilir
-                                      // Ama şimdilik Text olarak gösterelim veya sepete direkt atalım.
-
-            // EN İYİSİ: DİREKT SEPETE ATMAK
-
             // 1. Stok ve Etkileşim Kontrolü
             if (!EtkilesimKontrol(ilacAdi)) return;
             if (!StokYeterliMi(ilacAdi, adet)) return;
@@ -289,6 +286,7 @@ namespace Eczane_Otomasyonu
             SepetGuncelle();
             MessageBox.Show($"🛒 {adet} adet {ilacAdi} satış ekranına eklendi!", "Asistan");
         }
+
         void RecetedekiIlaclariBul(string metin)
         {
             metin = metin.ToLower(); // Karşılaştırma için küçült
@@ -542,10 +540,97 @@ namespace Eczane_Otomasyonu
         private void txtTc_Leave(object sender, EventArgs e) { if (txtTc.Text.Length == 11) { try { SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1 AND KullaniciID=@uid", bgl.baglanti()); komut.Parameters.AddWithValue("@p1", txtTc.Text); komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); SqlDataReader dr = komut.ExecuteReader(); if (dr.Read()) { txtHastaAdi.Text = dr[0].ToString(); } bgl.baglanti().Close(); } catch { } } }
         private void txtAdet_TextChanged(object sender, EventArgs e) { try { decimal f = decimal.Parse(txtFiyat.Text); int a = int.Parse(txtAdet.Text); } catch { } }
         private void txtFiyat_TextChanged(object sender, EventArgs e) { txtAdet_TextChanged(null, null); }
+        private void txtBarkod_EditValueChanged(object sender, EventArgs e) { }
 
-        private void txtBarkod_EditValueChanged(object sender, EventArgs e)
+        // ============================================================
+        // 6. YAPAY ZEKA RİSK ANALİZİ (YENİ EKLENEN KISIM)
+        // ============================================================
+        private async void btnRiskAnaliz_Click(object sender, EventArgs e)
         {
+            // 1. Sepet Kontrolü
+            if (_sepet.Count < 2)
+            {
+                MessageBox.Show("Etkileşim analizi için sepette en az 2 farklı ilaç olmalıdır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
 
+            // 2. Butonu Pasif Yap (Çift tıklamayı önle)
+            var btn = (SimpleButton)sender;
+            string eskiMetin = btn.Text;
+            btn.Text = "Analiz Ediliyor...";
+            btn.Enabled = false;
+
+            try
+            {
+                // 3. İlaç Listesini Hazırla
+                string ilaclar = string.Join(", ", _sepet.Select(x => x.IlacAdi));
+
+                // 4. Prompt (Soru) Hazırla
+                string prompt = $"Elimde şu ilaçlar var: {ilaclar}. " +
+                                "Bu ilaçların birlikte kullanılması (etkileşimi) tıbbi açıdan riskli mi? " +
+                                "Lütfen cevabını şu formatta ver: 'DURUM: [RİSKLİ/RİSKSİZ] - AÇIKLAMA: [Kısa ve net açıklama]' " +
+                                "Eğer ciddi bir hayati risk varsa uyarı işaretleri kullan.";
+
+                // 5. API'ye Sor
+                string cevap = await GeminiyeSor(prompt);
+
+                // 6. Cevabı Göster
+                if (cevap.Contains("RİSKLİ"))
+                {
+                    MessageBox.Show(cevap, "⚠️ DİKKAT: RİSKLİ ETKİLEŞİM", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    MessageBox.Show("✅ İlaçlar arasında bilinen kritik bir etkileşim yok.\n\n" + cevap, "Güvenli", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Yapay Zeka Bağlantı Hatası: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btn.Text = eskiMetin;
+                btn.Enabled = true;
+            }
+        }
+
+        // --- GEMINI API İLETİŞİM METODU ---
+        private async Task<string> GeminiyeSor(string soru)
+        {
+            // 🔑 BURAYA KENDİ GEMINI API KEY'İNİ YAPIŞTIR
+            string apiKey = "AIzaSyDvqHcWCL6MFH5RfY4d3w_hH5nZ9cVIhbg";
+
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+
+            using (HttpClient client = new HttpClient())
+            {
+                var payload = new
+                {
+                    contents = new[]
+                    {
+                        new { parts = new[] { new { text = soru } } }
+                    }
+                };
+
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(url, content);
+                string responseString = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+                    // Dönen cevabın içinden metni ayıkla
+                    string sonuc = jsonResponse.candidates[0].content.parts[0].text;
+                    return sonuc;
+                }
+                else
+                {
+                    return "API Hatası: " + response.ReasonPhrase;
+                }
+            }
         }
     }
 }

@@ -544,6 +544,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1904, 1041);
             this.Controls.Add(this.lstBildirimler);
             this.Controls.Add(this.pnlAyarlar);
@@ -552,6 +553,7 @@
             this.Controls.Add(this.pnlTahmin);
             this.Controls.Add(this.ribbonStatusBar);
             this.Controls.Add(this.ribbon);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.Name = "FrmAnaModul";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
