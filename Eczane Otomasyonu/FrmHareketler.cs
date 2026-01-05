@@ -12,7 +12,7 @@ using System.IO;   // Dosya işlemleri için
 using System.Net.Http; // API iletişimi için
 using System.Text;     // Encoding işlemleri için
 using System.Threading.Tasks; // Asenkron işlemler için
-using Newtonsoft.Json; // JSON işlemleri için (NuGet'ten indirmelisin)
+using Newtonsoft.Json; // JSON işlemleri için
 
 namespace Eczane_Otomasyonu
 {
@@ -29,41 +29,41 @@ namespace Eczane_Otomasyonu
             InitializeComponent();
 
             // --- OLAYLARI GÜVENLİ BAĞLAMA ---
-            // Form Yüklenirken
+            // 1. Form Yüklenirken
             this.Load -= FrmHareketler_Load;
             this.Load += FrmHareketler_Load;
 
-            // İlaç Seçimi Değişince
+            // 2. İlaç Seçimi Değişince
             lueIlac.EditValueChanged -= lueIlac_EditValueChanged;
             lueIlac.EditValueChanged += lueIlac_EditValueChanged;
 
-            // TC Girilince
+            // 3. İlaç Kutusuna Tıklanırsa (Listeyi Yeniler)
+            lueIlac.QueryPopUp -= lueIlac_QueryPopUp;
+            lueIlac.QueryPopUp += lueIlac_QueryPopUp;
+
+            // 4. TC Girilince
             txtTc.Leave -= txtTc_Leave;
             txtTc.Leave += txtTc_Leave;
 
-            // Barkod Kutusu (Eğer tasarımda eklediysen)
+            // 5. Barkod Kutusu
             if (txtBarkod != null)
             {
                 txtBarkod.KeyDown -= txtBarkod_KeyDown;
                 txtBarkod.KeyDown += txtBarkod_KeyDown;
             }
 
-            // Butonları Bağla (İsimler tasarımda farklıysa hata vermesin diye try-catch)
+            // 6. Butonları Bağla
             try
             {
-                // Satış Yap Butonu
                 var btnSatis = this.Controls.Find("btnSatisYap", true);
                 if (btnSatis.Length > 0) { btnSatis[0].Click -= btnSatisYap_Click; btnSatis[0].Click += btnSatisYap_Click; }
 
-                // Sepete Ekle Butonu
                 var btnSepet = this.Controls.Find("btnSepeteEkle", true);
                 if (btnSepet.Length > 0) { btnSepet[0].Click -= btnSepeteEkle_Click; btnSepet[0].Click += btnSepeteEkle_Click; }
 
-                // 📸 REÇETE OKU Butonu
                 var btnRecete = this.Controls.Find("btnReceteYukle", true);
                 if (btnRecete.Length > 0) { btnRecete[0].Click -= btnReceteYukle_Click; btnRecete[0].Click += btnReceteYukle_Click; }
 
-                // ⚠️ RİSK ANALİZİ Butonu (Yeni eklenen)
                 var btnRisk = this.Controls.Find("btnRiskAnaliz", true);
                 if (btnRisk.Length > 0) { btnRisk[0].Click -= btnRiskAnaliz_Click; btnRisk[0].Click += btnRiskAnaliz_Click; }
             }
@@ -85,7 +85,74 @@ namespace Eczane_Otomasyonu
             txtTc.Properties.Mask.EditMask = "00000000000";
             txtTc.Properties.Mask.UseMaskAsDisplayFormat = true;
 
+            // Resim Kutusunu Ayarla (Resim sığsın diye)
+            if (pictureEdit1 != null)
+            {
+                pictureEdit1.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
+                pictureEdit1.Properties.NullText = "Resim Yok";
+            }
+
             gridView1.OptionsBehavior.Editable = false;
+        }
+
+        // --- İlaç Kutusuna Tıklayınca Listeyi Yeniler ---
+        private void lueIlac_QueryPopUp(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ilacListesiGetir();
+        }
+
+        // --- İlaç Listesini Getiren Metod ---
+        void ilacListesiGetir()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                // Not: Resim sütunun varsa kalsın, yoksa "Resim" kısmını sil
+                SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat, Resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
+                da.Fill(dt);
+                lueIlac.Properties.DataSource = dt;
+                lueIlac.Properties.ValueMember = "ilacAdı";
+                lueIlac.Properties.DisplayMember = "ilacAdı";
+            }
+            catch { }
+        }
+
+        // --- İlaç Seçilince Fiyatı ve Resmi Getir ---
+        private void lueIlac_EditValueChanged(object sender, EventArgs e)
+        {
+            // Önce temizle
+            if (pictureEdit1 != null) pictureEdit1.Image = null;
+            txtFiyat.Text = "";
+
+            if (lueIlac.EditValue != null)
+            {
+                object val = lueIlac.Properties.GetDataSourceRowByKeyValue(lueIlac.EditValue);
+                DataRowView row = val as DataRowView;
+                if (row != null)
+                {
+                    // 1. Fiyatı Yaz
+                    txtFiyat.Text = row["fiyat"].ToString();
+
+                    // 2. Resmi Getir
+                    if (pictureEdit1 != null)
+                    {
+                        try
+                        {
+                            string resimYolu = row["Resim"].ToString();
+
+                            if (!string.IsNullOrEmpty(resimYolu) && System.IO.File.Exists(resimYolu))
+                            {
+                                pictureEdit1.Image = Image.FromFile(resimYolu);
+                            }
+                            else
+                            {
+                                pictureEdit1.Image = null;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
         }
 
         // ============================================================
@@ -126,13 +193,13 @@ namespace Eczane_Otomasyonu
             lueIlac.EditValue = null;
             txtAdet.Text = "";
             txtFiyat.Text = "";
+            if (pictureEdit1 != null) pictureEdit1.Image = null;
         }
 
         void SepetGuncelle()
         {
             try
             {
-                // Gridi Güncelle
                 var gridler = this.Controls.Find("gridSepet", true);
                 if (gridler.Length > 0)
                 {
@@ -141,7 +208,6 @@ namespace Eczane_Otomasyonu
                     gc.DataSource = _sepet;
                 }
 
-                // Toplam Tutarı Label'a Yaz
                 decimal toplam = _sepet.Sum(x => x.Toplam);
                 var lbl = this.Controls.Find("lblToplamTutar", true);
                 if (lbl.Length > 0) lbl[0].Text = $"{toplam:C2}";
@@ -165,9 +231,9 @@ namespace Eczane_Otomasyonu
                 if (!string.IsNullOrEmpty(okunanBarkod))
                 {
                     BarkodlaSepeteEkle(okunanBarkod);
-                    txtBarkod.Text = ""; // Temizle
-                    e.SuppressKeyPress = true; // Sesi kapat
-                    txtBarkod.Focus(); // İmleci geri getir
+                    txtBarkod.Text = "";
+                    e.SuppressKeyPress = true;
+                    txtBarkod.Focus();
                 }
             }
         }
@@ -184,10 +250,15 @@ namespace Eczane_Otomasyonu
                 cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
 
                 SqlDataReader dr = cmd.ExecuteReader();
-                if (dr.Read()) // İlaç bulundu
+                if (dr.Read())
                 {
                     string ilacAdi = dr["ilacAdı"].ToString();
                     decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
+
+                    string resimYolu = dr["Resim"].ToString();
+                    if (pictureEdit1 != null && !string.IsNullOrEmpty(resimYolu) && File.Exists(resimYolu))
+                        pictureEdit1.Image = Image.FromFile(resimYolu);
+
                     dr.Close();
 
                     if (!EtkilesimKontrol(ilacAdi)) { conn.Close(); return; }
@@ -210,53 +281,207 @@ namespace Eczane_Otomasyonu
         }
 
         // ============================================================
-        // 3. OCR - FOTOĞRAFTAN REÇETE OKUMA
+        // 3. OCR ve CHAT İŞLEMLERİ (HİBRİT YAPI)
         // ============================================================
-        private void btnReceteYukle_Click(object sender, EventArgs e)
+        private async void btnReceteYukle_Click(object sender, EventArgs e)
         {
+            // 1. Dosya Seçtirme Ekranı
             OpenFileDialog dosya = new OpenFileDialog();
             dosya.Filter = "Resim Dosyaları|*.jpg;*.jpeg;*.png;*.bmp";
-            dosya.Title = "Reçete Fotoğrafını Seçin";
+            dosya.Title = "Reçete Seç";
 
             if (dosya.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    // 1. Programın çalıştığı klasördeki 'tessdata'yı bul
-                    string tessYolu = System.IO.Path.Combine(Application.StartupPath, "tessdata");
+                    // 2. Yol Kontrolü
+                    string programKlasoru = AppDomain.CurrentDomain.BaseDirectory;
+                    string tessYolu = System.IO.Path.Combine(programKlasoru, "tessdata");
 
-                    // 2. Tesseract'ı Türkçe (tur) olarak başlat
+                    if (!System.IO.Directory.Exists(tessYolu))
+                    {
+                        MessageBox.Show("KRİTİK HATA: 'tessdata' klasörü bulunamadı!\n" + tessYolu, "Klasör Eksik");
+                        return;
+                    }
+
+                    // 3. Tesseract Başlatma
                     using (var motor = new TesseractEngine(tessYolu, "tur", EngineMode.Default))
                     {
                         using (var resim = Pix.LoadFromFile(dosya.FileName))
                         {
                             using (var sayfa = motor.Process(resim))
                             {
-                                // 3. Metni Oku
                                 string okunanMetin = sayfa.GetText();
-                                MessageBox.Show("📷 Okunan Reçete:\n------------------\n" + okunanMetin, "OCR Analizi");
+                                MessageBox.Show("OCR Okuma Başarılı!\nReçete Analiz Ediliyor...", "Bilgi");
 
-                                // 4. Metin içindeki ilaçları bul ve sepete at
-                                RecetedekiIlaclariBul(okunanMetin);
+                                // BURADA YENİ HİBRİT METODU ÇAĞIRIYORUZ
+                                await HibritReceteAnalizi(okunanMetin);
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("OCR Hatası: " + ex.Message);
+                    // Hata Dedektifi
+                    string mesaj = "GENEL HATA: " + ex.Message;
+                    if (ex.InnerException != null) mesaj += "\n\nDetay: " + ex.InnerException.Message;
+                    MessageBox.Show(mesaj, "Hata Dedektifi");
                 }
             }
         }
 
-        // --- DIŞARIDAN (CHAT'TEN) GELEN SATIŞ EMRİNİ UYGULA ---
+        // --- YENİ EKLENEN HİBRİT ANALİZ METODU (DÜZELTİLDİ: Stok -> adet) ---
+        private async Task HibritReceteAnalizi(string ocrMetni)
+        {
+            string[] satirlar = ocrMetni.Split('\n');
+
+            List<string> direkEklenenler = new List<string>();
+            List<string> sqlMuadilOnerileri = new List<string>();
+            List<string> tanimsizIlaclar = new List<string>();
+
+            // ADIM 1: Yerel Veritabanı Taraması (Hızlı Aşama)
+            SqlConnection conn = bgl.baglanti();
+            if (conn.State == ConnectionState.Closed) conn.Open();
+
+            foreach (string satir in satirlar)
+            {
+                string ilacAdi = satir.Trim().Replace("\r", "").Replace(".", "").Trim();
+                if (ilacAdi.Length < 3) continue;
+
+                // İlaç Kayıtlı mı? (DÜZELTME: Stok yerine adet kullanıldı)
+                SqlCommand komut = new SqlCommand("Select adet, EtkenMadde, fiyat From Ilaclar where ilacAdı=@p1 AND KullaniciID=@uid", conn);
+                komut.Parameters.AddWithValue("@p1", ilacAdi);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+                SqlDataReader dr = komut.ExecuteReader();
+
+                if (dr.Read()) // EVET, İlaç Sistemde Var
+                {
+                    // DÜZELTME: Veritabanından 'adet' okunuyor
+                    int stokSayisi = Convert.ToInt32(dr["adet"]);
+                    string etkenMadde = dr["EtkenMadde"] != DBNull.Value ? dr["EtkenMadde"].ToString() : "";
+                    decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
+
+                    if (stokSayisi > 0)
+                    {
+                        // Stokta var, sepete ekle
+                        var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
+                        if (mevcut != null) mevcut.Adet++;
+                        else _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = 1, BirimFiyat = fiyat });
+
+                        direkEklenenler.Add(ilacAdi);
+                    }
+                    else
+                    {
+                        // Stokta yok ama sistemde kayıtlı -> SQL'den Muadil Bak
+                        dr.Close(); // Okuyucuyu kapat
+                        string yerelMuadil = SQLdenMuadilGetir(etkenMadde, ilacAdi);
+                        sqlMuadilOnerileri.Add(yerelMuadil);
+                        goto SonrakiSatir;
+                    }
+                }
+                else // HAYIR, İlaç Sistemde Yok
+                {
+                    tanimsizIlaclar.Add(ilacAdi);
+                }
+                dr.Close();
+
+            SonrakiSatir:;
+            }
+            conn.Close();
+            SepetGuncelle();
+
+            // ADIM 2: Tanımsızlar İçin Gemini Devreye Girsin (Akıllı Aşama)
+            string aiOnerisi = "";
+            if (tanimsizIlaclar.Count > 0)
+            {
+                string stokListesi = StoktakiTumIlaclariGetir();
+                string bilinmeyenler = string.Join(", ", tanimsizIlaclar);
+
+                string prompt = $"Eczane stoğum: [{stokListesi}]. " +
+                                $"Reçetede yazan ama veritabanımda bulamadığım metinler: [{bilinmeyenler}]. " +
+                                $"Lütfen bu metinlerden hangilerinin ilaç ismi olduğunu tespit et. " +
+                                $"Eğer ilaçsa, benim stok listemden buna en uygun muadili (eşdeğeri) öner. " +
+                                $"Cevabı sadece şu formatta ver: 'Bulunamayan: [X] -> Önerilen Stok: [Y] (Sebebi: ...)'";
+
+                aiOnerisi = await GeminiyeSor(prompt);
+            }
+
+            // ADIM 3: Raporlama
+            string rapor = "--- ANALİZ RAPORU ---\n\n";
+
+            if (direkEklenenler.Count > 0)
+                rapor += "✅ Stoktan Sepete Eklenenler:\n" + string.Join(", ", direkEklenenler) + "\n\n";
+
+            if (sqlMuadilOnerileri.Count > 0)
+                rapor += "🔄 Stokta Yok - Sistem İçi Muadil Önerileri:\n" + string.Join("\n", sqlMuadilOnerileri) + "\n\n";
+
+            if (!string.IsNullOrEmpty(aiOnerisi))
+                rapor += "🤖 YAPAY ZEKA ÖNERİLERİ (Bilinmeyen İlaçlar):\n" + aiOnerisi;
+
+            if (direkEklenenler.Count == 0 && sqlMuadilOnerileri.Count == 0 && string.IsNullOrEmpty(aiOnerisi))
+                rapor += "Reçeteden okunabilir bir ilaç tespit edilemedi.";
+
+            MessageBox.Show(rapor, "Akıllı Eczane Asistanı");
+        }
+
+        // --- YARDIMCI: SQL'den etken maddeye göre muadil bulur (DÜZELTİLDİ: Stok -> adet) ---
+        private string SQLdenMuadilGetir(string etkenMadde, string arananIlac)
+        {
+            if (string.IsNullOrEmpty(etkenMadde)) return $"❌ {arananIlac} (Stok Yok ve Etken Madde Girilmemiş)";
+
+            string sonuc = $"❌ {arananIlac} (Stok Yok)";
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                // DÜZELTME: adet > 0 sorgusu
+                SqlCommand komut = new SqlCommand("Select Top 1 ilacAdı, fiyat From Ilaclar where EtkenMadde=@p1 AND adet > 0 AND ilacAdı != @p2 AND KullaniciID=@uid", conn);
+                komut.Parameters.AddWithValue("@p1", etkenMadde);
+                komut.Parameters.AddWithValue("@p2", arananIlac);
+                komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                SqlDataReader dr = komut.ExecuteReader();
+                if (dr.Read())
+                {
+                    sonuc += $" -> 💡 ÖNERİ: {dr["ilacAdı"]} ({dr["fiyat"]} TL)";
+                }
+                else
+                {
+                    sonuc += " -> Muadil Bulunamadı (SQL)";
+                }
+                conn.Close();
+            }
+            catch { }
+            return sonuc;
+        }
+
+        // --- YARDIMCI: Gemini için stok listesi hazırlar (DÜZELTİLDİ: Stok -> adet) ---
+        private string StoktakiTumIlaclariGetir()
+        {
+            string liste = "";
+            try
+            {
+                SqlConnection conn = bgl.baglanti();
+                if (conn.State == ConnectionState.Closed) conn.Open();
+                // DÜZELTME: adet > 0 sorgusu
+                SqlCommand komut = new SqlCommand("Select ilacAdı From Ilaclar where adet > 0 AND KullaniciID=" + MevcutKullanici.Id, conn);
+                SqlDataReader dr = komut.ExecuteReader();
+                while (dr.Read())
+                {
+                    liste += dr[0].ToString() + ", ";
+                }
+                conn.Close();
+            }
+            catch { }
+            return liste;
+        }
+
         public void ChattenSatisYap(string ilacAdi, int adet)
         {
-            // 1. Stok ve Etkileşim Kontrolü
             if (!EtkilesimKontrol(ilacAdi)) return;
             if (!StokYeterliMi(ilacAdi, adet)) return;
 
-            // 2. Fiyatı Bul
             decimal fiyat = 0;
             try
             {
@@ -271,60 +496,12 @@ namespace Eczane_Otomasyonu
             }
             catch { }
 
-            // 3. Sepete Ekle
             var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == ilacAdi);
-            if (mevcut != null)
-            {
-                mevcut.Adet += adet;
-            }
-            else
-            {
-                _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = adet, BirimFiyat = fiyat });
-            }
+            if (mevcut != null) mevcut.Adet += adet;
+            else _sepet.Add(new SepetItem { IlacAdi = ilacAdi, Adet = adet, BirimFiyat = fiyat });
 
-            // 4. Ekranı Güncelle
             SepetGuncelle();
             MessageBox.Show($"🛒 {adet} adet {ilacAdi} satış ekranına eklendi!", "Asistan");
-        }
-
-        void RecetedekiIlaclariBul(string metin)
-        {
-            metin = metin.ToLower(); // Karşılaştırma için küçült
-            int bulunanSayisi = 0;
-
-            try
-            {
-                SqlConnection conn = bgl.baglanti();
-                if (conn.State == ConnectionState.Closed) conn.Open();
-
-                SqlCommand cmd = new SqlCommand("SELECT ilacAdı, fiyat FROM Ilaclar WHERE KullaniciID=@uid", conn);
-                cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
-                SqlDataReader dr = cmd.ExecuteReader();
-
-                while (dr.Read())
-                {
-                    string dbIlacAdi = dr["ilacAdı"].ToString();
-                    decimal fiyat = Convert.ToDecimal(dr["fiyat"]);
-
-                    // Metin içinde bu ilaç adı geçiyor mu?
-                    if (metin.Contains(dbIlacAdi.ToLower()))
-                    {
-                        var mevcut = _sepet.FirstOrDefault(x => x.IlacAdi == dbIlacAdi);
-                        if (mevcut != null) mevcut.Adet++;
-                        else _sepet.Add(new SepetItem { IlacAdi = dbIlacAdi, Adet = 1, BirimFiyat = fiyat });
-
-                        bulunanSayisi++;
-                    }
-                }
-                conn.Close();
-                SepetGuncelle();
-
-                if (bulunanSayisi > 0)
-                    MessageBox.Show($"✅ Reçetede {bulunanSayisi} adet ilaç bulundu ve sepete eklendi!", "Başarılı");
-                else
-                    MessageBox.Show("❌ Reçete okundu ama listedeki ilaçlarla eşleşen bir isim bulunamadı.\n(İlaç ismi reçetede net görünmeli ve veritabanıyla aynı yazılmalı)", "Sonuç");
-            }
-            catch { }
         }
 
         // ============================================================
@@ -366,6 +543,7 @@ namespace Eczane_Otomasyonu
                 // Satış Hareketleri
                 foreach (var item in _sepet)
                 {
+                    // DÜZELTME: Veritabanında adet sütunu olduğu için burası doğruydu, koruduk.
                     SqlCommand cmdDus = new SqlCommand("Update Ilaclar set adet=adet-@p1 where ilacAdı=@p2 AND KullaniciID=@uid", conn);
                     cmdDus.Parameters.AddWithValue("@p1", item.Adet);
                     cmdDus.Parameters.AddWithValue("@p2", item.IlacAdi);
@@ -391,6 +569,7 @@ namespace Eczane_Otomasyonu
                 SepetGuncelle();
                 listele();
                 temizle();
+                if (pictureEdit1 != null) pictureEdit1.Image = null;
             }
             catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); if (conn.State == ConnectionState.Open) conn.Close(); }
             finally { islemYapiliyor = false; }
@@ -514,6 +693,7 @@ namespace Eczane_Otomasyonu
             try
             {
                 SqlConnection conn = bgl.baglanti();
+                // DÜZELTME: Veritabanında adet sütunu var
                 SqlCommand cmd = new SqlCommand("Select adet From Ilaclar where ilacAdı=@p1 AND KullaniciID=@uid", conn);
                 cmd.Parameters.AddWithValue("@p1", ilacAdi);
                 cmd.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
@@ -534,27 +714,25 @@ namespace Eczane_Otomasyonu
         }
 
         void listele() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select * From Hareketler WHERE KullaniciID=" + MevcutKullanici.Id + " ORDER BY tarih DESC", bgl.baglanti()); da.Fill(dt); gridControl1.DataSource = dt; gridView1.BestFitColumns(); } catch { } }
-        void ilacListesiGetir() { try { DataTable dt = new DataTable(); SqlDataAdapter da = new SqlDataAdapter("Select ilacAdı, fiyat From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti()); da.Fill(dt); lueIlac.Properties.DataSource = dt; lueIlac.Properties.ValueMember = "ilacAdı"; lueIlac.Properties.DisplayMember = "ilacAdı"; } catch { } }
+
         void temizle() { lueIlac.EditValue = null; txtTc.Text = ""; txtHastaAdi.Text = ""; txtAdet.Text = ""; txtFiyat.Text = ""; }
-        private void lueIlac_EditValueChanged(object sender, EventArgs e) { if (lueIlac.EditValue != null) { object val = lueIlac.Properties.GetDataSourceRowByKeyValue(lueIlac.EditValue); DataRowView row = val as DataRowView; if (row != null) txtFiyat.Text = row["fiyat"].ToString(); } }
+
         private void txtTc_Leave(object sender, EventArgs e) { if (txtTc.Text.Length == 11) { try { SqlCommand komut = new SqlCommand("Select Ad + ' ' + Soyad From Hastalar where TC=@p1 AND KullaniciID=@uid", bgl.baglanti()); komut.Parameters.AddWithValue("@p1", txtTc.Text); komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id); SqlDataReader dr = komut.ExecuteReader(); if (dr.Read()) { txtHastaAdi.Text = dr[0].ToString(); } bgl.baglanti().Close(); } catch { } } }
         private void txtAdet_TextChanged(object sender, EventArgs e) { try { decimal f = decimal.Parse(txtFiyat.Text); int a = int.Parse(txtAdet.Text); } catch { } }
         private void txtFiyat_TextChanged(object sender, EventArgs e) { txtAdet_TextChanged(null, null); }
         private void txtBarkod_EditValueChanged(object sender, EventArgs e) { }
 
         // ============================================================
-        // 6. YAPAY ZEKA RİSK ANALİZİ (YENİ EKLENEN KISIM)
+        // 6. YAPAY ZEKA RİSK ANALİZİ
         // ============================================================
         private async void btnRiskAnaliz_Click(object sender, EventArgs e)
         {
-            // 1. Sepet Kontrolü
             if (_sepet.Count < 2)
             {
                 MessageBox.Show("Etkileşim analizi için sepette en az 2 farklı ilaç olmalıdır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // 2. Butonu Pasif Yap (Çift tıklamayı önle)
             var btn = (SimpleButton)sender;
             string eskiMetin = btn.Text;
             btn.Text = "Analiz Ediliyor...";
@@ -562,19 +740,14 @@ namespace Eczane_Otomasyonu
 
             try
             {
-                // 3. İlaç Listesini Hazırla
                 string ilaclar = string.Join(", ", _sepet.Select(x => x.IlacAdi));
-
-                // 4. Prompt (Soru) Hazırla
                 string prompt = $"Elimde şu ilaçlar var: {ilaclar}. " +
                                 "Bu ilaçların birlikte kullanılması (etkileşimi) tıbbi açıdan riskli mi? " +
                                 "Lütfen cevabını şu formatta ver: 'DURUM: [RİSKLİ/RİSKSİZ] - AÇIKLAMA: [Kısa ve net açıklama]' " +
                                 "Eğer ciddi bir hayati risk varsa uyarı işaretleri kullan.";
 
-                // 5. API'ye Sor
                 string cevap = await GeminiyeSor(prompt);
 
-                // 6. Cevabı Göster
                 if (cevap.Contains("RİSKLİ"))
                 {
                     MessageBox.Show(cevap, "⚠️ DİKKAT: RİSKLİ ETKİLEŞİM", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -595,7 +768,6 @@ namespace Eczane_Otomasyonu
             }
         }
 
-        // --- GEMINI API İLETİŞİM METODU ---
         private async Task<string> GeminiyeSor(string soru)
         {
             // 🔑 BURAYA KENDİ GEMINI API KEY'İNİ YAPIŞTIR
@@ -622,7 +794,6 @@ namespace Eczane_Otomasyonu
                 if (response.IsSuccessStatusCode)
                 {
                     dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
-                    // Dönen cevabın içinden metni ayıkla
                     string sonuc = jsonResponse.candidates[0].content.parts[0].text;
                     return sonuc;
                 }

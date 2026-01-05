@@ -1,10 +1,15 @@
-﻿using System;
+﻿using DevExpress.XtraEditors;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
+using System.Threading.Tasks; // Asenkron işlemler için
 using System.Windows.Forms;
+using System.Net.Http;       // API iletişimi için
+using System.Text;           // Encoding işlemleri için
+using Newtonsoft.Json;       // JSON işlemleri için
 
 namespace Eczane_Otomasyonu
 {
@@ -18,19 +23,11 @@ namespace Eczane_Otomasyonu
         {
             InitializeComponent();
 
-            // --- 🛠️ GÖRÜNÜM AYARLARI (TAM KAPLAMA) ---
-
-            // 1. Tabloyu formun içine tam oturt
+            // --- 🛠️ GÖRÜNÜM AYARLARI ---
             gridControl1.Dock = DockStyle.Fill;
-
-            // 2. BURASI DEĞİŞTİ: Sütunlar ekranı tamamen doldursun (Sağda boşluk kalmasın)
             gridView1.OptionsView.ColumnAutoWidth = true;
-
-            // 3. Kaydırma çubukları otomatik (Sığmazsa çıkar, sığarsa çıkmaz)
             gridView1.HorzScrollVisibility = DevExpress.XtraGrid.Views.Base.ScrollVisibility.Auto;
             gridView1.VertScrollVisibility = DevExpress.XtraGrid.Views.Base.ScrollVisibility.Auto;
-
-            // ------------------------------------------------
 
             // Olayları Bağla
             try
@@ -42,6 +39,9 @@ namespace Eczane_Otomasyonu
                 Bagla("btnSil", btnSil_Click);
                 Bagla("btnGuncelle", btnGuncelle_Click);
                 Bagla("btnResimSec", btnResimSec_Click);
+
+                // YENİ EKLENEN BUTON BAĞLAMASI
+                Bagla("btnEtkenBul", btnEtkenBul_Click);
             }
             catch { }
         }
@@ -63,33 +63,28 @@ namespace Eczane_Otomasyonu
             gridView1.OptionsBehavior.Editable = false;
         }
 
+        // --- LİSTELEME METODU (EtkenMadde Eklendi) ---
         void listele()
         {
             try
             {
                 DataTable dt = new DataTable();
-                SqlDataAdapter da = new SqlDataAdapter("Select siraNo, ilacKodu, ilacAdı, fiyat, adet, resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
+                // SQL Sorgusuna 'EtkenMadde' eklendi
+                SqlDataAdapter da = new SqlDataAdapter("Select siraNo, ilacKodu, ilacAdı, fiyat, adet, EtkenMadde, resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
                 da.Fill(dt);
                 gridControl1.DataSource = dt;
 
-                // --- 🛠️ ÇÖZÜM BURASI ---
-                // Grid'deki sütunları veritabanına göre sıfırlayıp tekrar oluşturur.
-                // Böylece "siraNo" ismi eşleşmeme sorunu ortadan kalkar.
                 gridView1.PopulateColumns();
+                gridView1.OptionsView.ColumnAutoWidth = true;
+                gridView1.BestFitColumns();
 
-                // --- GÖRÜNÜM AYARLARI ---
-                gridView1.OptionsView.ColumnAutoWidth = true; // Ekrana yayıl
-                gridView1.BestFitColumns(); // İçeriğe göre genişle
-
-                // Başlıkları Güzelleştir (İsteğe Bağlı)
-                gridView1.Columns["siraNo"].Caption = "SIRA NO";
-                gridView1.Columns["ilacKodu"].Caption = "İLAÇ KODU";
-                gridView1.Columns["ilacAdı"].Caption = "İLAÇ ADI";
-                gridView1.Columns["fiyat"].Caption = "FİYAT";
-                gridView1.Columns["adet"].Caption = "ADET";
-
-                // Resim yolu sütununu gizlemek istersen (Gerek yoksa):
-                // gridView1.Columns["resim"].Visible = false;
+                // Başlıkları Güzelleştir
+                if (gridView1.Columns["siraNo"] != null) gridView1.Columns["siraNo"].Caption = "SIRA NO";
+                if (gridView1.Columns["ilacKodu"] != null) gridView1.Columns["ilacKodu"].Caption = "İLAÇ KODU";
+                if (gridView1.Columns["ilacAdı"] != null) gridView1.Columns["ilacAdı"].Caption = "İLAÇ ADI";
+                if (gridView1.Columns["fiyat"] != null) gridView1.Columns["fiyat"].Caption = "FİYAT";
+                if (gridView1.Columns["adet"] != null) gridView1.Columns["adet"].Caption = "ADET";
+                if (gridView1.Columns["EtkenMadde"] != null) gridView1.Columns["EtkenMadde"].Caption = "ETKEN MADDE"; // Yeni Başlık
             }
             catch { }
         }
@@ -106,6 +101,11 @@ namespace Eczane_Otomasyonu
             txtAd.Text = "";
             txtFiyat.Text = "";
             txtAdet.Text = "";
+
+            // Eğer tasarımda txtEtkenMadde varsa temizle
+            var txtEtken = this.Controls.Find("txtEtkenMadde", true);
+            if (txtEtken.Length > 0) txtEtken[0].Text = "";
+
             picResim.Image = null;
             resimDosyaYolu = "";
         }
@@ -116,7 +116,6 @@ namespace Eczane_Otomasyonu
             else { picResim.Image = null; resimDosyaYolu = ""; }
         }
 
-       
         private void txtAd_Leave(object sender, EventArgs e) { if (txtAd.Text.Trim() != "" && txtKod.Text == "") VeriGetir("ilacAdı", txtAd.Text.Trim()); }
 
         void VeriGetir(string kolon, string deger)
@@ -133,6 +132,12 @@ namespace Eczane_Otomasyonu
                     if (kolon == "ilacAdı") txtKod.Text = dr["ilacKodu"].ToString();
                     if (kolon == "ilacKodu") txtAd.Text = dr["ilacAdı"].ToString();
                     txtFiyat.Text = dr["fiyat"].ToString();
+
+                    // Veri getirirken etken maddeyi de getir
+                    var txtEtken = this.Controls.Find("txtEtkenMadde", true);
+                    if (txtEtken.Length > 0 && dr["EtkenMadde"] != DBNull.Value)
+                        txtEtken[0].Text = dr["EtkenMadde"].ToString();
+
                     resimYukle(dr["resim"].ToString());
                 }
                 bgl.baglanti().Close();
@@ -140,6 +145,7 @@ namespace Eczane_Otomasyonu
             catch { }
         }
 
+        // --- GRID SATIR TIKLAMA (Etken Maddeyi Kutuya Taşıma) ---
         private void gridView1_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
         {
             try
@@ -152,6 +158,11 @@ namespace Eczane_Otomasyonu
                     txtAd.Text = dr["ilacAdı"].ToString();
                     txtFiyat.Text = dr["fiyat"].ToString();
                     txtAdet.Text = dr["adet"].ToString();
+
+                    // Etken Maddeyi Yükle
+                    var txtEtken = this.Controls.Find("txtEtkenMadde", true);
+                    if (txtEtken.Length > 0) txtEtken[0].Text = dr["EtkenMadde"].ToString();
+
                     resimYukle(dr["resim"].ToString());
                 }
             }
@@ -197,6 +208,81 @@ namespace Eczane_Otomasyonu
             if (dosya.ShowDialog() == DialogResult.OK) resimYukle(dosya.FileName);
         }
 
+        // ============================================================
+        //  YAPAY ZEKA İLE ETKEN MADDE BULMA METODLARI
+        // ============================================================
+
+        // 1. Butona Tıklanınca Çalışacak Kod
+        private async void btnEtkenBul_Click(object sender, EventArgs e)
+        {
+            if (txtAd.Text == "")
+            {
+                MessageBox.Show("Lütfen önce ilaç adını yazın.", "Uyarı");
+                return;
+            }
+
+            // Butonu bul ve kilitle
+            var btn = (SimpleButton)sender;
+            string eskiYazi = btn.Text;
+            btn.Text = "Aranıyor...";
+            btn.Enabled = false;
+
+            try
+            {
+                string ilacAdi = txtAd.Text;
+                string prompt = $"'{ilacAdi}' isimli ilacın etken maddesi nedir? " +
+                                $"Cevap olarak SADECE etken maddenin ismini yaz. " +
+                                $"Ekstra açıklama, nokta veya cümle kurma. " +
+                                $"Örnek cevap: 'Parasetamol'";
+
+                string etkenMadde = await GeminiyeSor(prompt);
+
+                // Kutuyu bul ve yaz
+                var txtEtken = this.Controls.Find("txtEtkenMadde", true);
+                if (txtEtken.Length > 0) txtEtken[0].Text = etkenMadde;
+                else MessageBox.Show("Etken Madde kutusu (txtEtkenMadde) bulunamadı! Tasarımda ekli mi?", "Hata");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata: " + ex.Message);
+            }
+            finally
+            {
+                btn.Text = eskiYazi;
+                btn.Enabled = true;
+            }
+        }
+
+        // 2. Gemini API ile İletişim Kuran Metod
+        private async Task<string> GeminiyeSor(string soru)
+        {
+            string apiKey = "AIzaSyDvqHcWCL6MFH5RfY4d3w_hH5nZ9cVIhbg"; // Senin API Anahtarın
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+
+            using (HttpClient client = new HttpClient())
+            {
+                var payload = new { contents = new[] { new { parts = new[] { new { text = soru } } } } };
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    var response = await client.PostAsync(url, content);
+                    string responseString = await response.Content.ReadAsStringAsync();
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+                        return jsonResponse.candidates[0].content.parts[0].text.ToString().Trim();
+                    }
+                }
+                catch { }
+                return "Bulunamadı";
+            }
+        }
+
+        // ============================================================
+
         void IslemYap(string tur)
         {
             if (txtKod.Text.Trim() == "" || txtAd.Text.Trim() == "" || txtAdet.Text == "" || txtFiyat.Text.Trim() == "")
@@ -212,6 +298,11 @@ namespace Eczane_Otomasyonu
                 MessageBox.Show("Sayı hatası. Fiyat veya Adet yanlış.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            // Etken Madde kutusunun değerini al
+            string etkenMaddeDegeri = "";
+            var txtEtken = this.Controls.Find("txtEtkenMadde", true);
+            if (txtEtken.Length > 0) etkenMaddeDegeri = txtEtken[0].Text;
 
             islemYapiliyor = true;
             SqlConnection conn = bgl.baglanti();
@@ -231,12 +322,14 @@ namespace Eczane_Otomasyonu
                     {
                         if (MessageBox.Show("İlaç zaten var. Eklensin mi?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
-                            SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4 where ilacKodu=@p5 AND KullaniciID=@uid", conn);
+                            // UPDATE işlemine EtkenMadde eklendi
+                            SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4, EtkenMadde=@p6 where ilacKodu=@p5 AND KullaniciID=@uid", conn);
                             komut.Parameters.AddWithValue("@p1", adet);
                             komut.Parameters.AddWithValue("@p2", fiyat);
                             komut.Parameters.AddWithValue("@p3", resimDosyaYolu);
                             komut.Parameters.AddWithValue("@p4", txtAd.Text);
                             komut.Parameters.AddWithValue("@p5", txtKod.Text);
+                            komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri); // Yeni
                             komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                             komut.ExecuteNonQuery();
                             MessageBox.Show("Eklendi.");
@@ -244,12 +337,14 @@ namespace Eczane_Otomasyonu
                     }
                     else
                     {
-                        SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @uid)", conn);
+                        // INSERT işlemine EtkenMadde eklendi
+                        SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim, EtkenMadde, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @p6, @uid)", conn);
                         komut.Parameters.AddWithValue("@p1", txtKod.Text);
                         komut.Parameters.AddWithValue("@p2", txtAd.Text);
                         komut.Parameters.AddWithValue("@p3", fiyat);
                         komut.Parameters.AddWithValue("@p4", adet);
                         komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
+                        komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri); // Yeni
                         komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                         komut.ExecuteNonQuery();
                         MessageBox.Show("Kaydedildi.");
@@ -258,13 +353,15 @@ namespace Eczane_Otomasyonu
                 else if (tur == "guncelle")
                 {
                     string id = txtsiraNo.Text;
-                    SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5 where siraNo=@p6 AND KullaniciID=@uid", conn);
+                    // UPDATE işlemine EtkenMadde eklendi
+                    SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5, EtkenMadde=@p7 where siraNo=@p6 AND KullaniciID=@uid", conn);
                     komut.Parameters.AddWithValue("@p1", txtKod.Text);
                     komut.Parameters.AddWithValue("@p2", txtAd.Text);
                     komut.Parameters.AddWithValue("@p3", fiyat);
                     komut.Parameters.AddWithValue("@p4", adet);
                     komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
                     komut.Parameters.AddWithValue("@p6", id);
+                    komut.Parameters.AddWithValue("@p7", etkenMaddeDegeri); // Yeni
                     komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     komut.ExecuteNonQuery();
                     MessageBox.Show("Güncellendi.");
@@ -292,6 +389,5 @@ namespace Eczane_Otomasyonu
                 MessageBox.Show($"'{gelenAd}' stokta yok. Kod ve Fiyat giriniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-       
     }
-    }
+}

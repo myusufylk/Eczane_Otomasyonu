@@ -46,6 +46,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmIlaclar));
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.labelControl7 = new DevExpress.XtraEditors.LabelControl();
+            this.txtEtkenMadde = new DevExpress.XtraEditors.TextEdit();
             this.btnResimSec = new DevExpress.XtraEditors.SimpleButton();
             this.picResim = new DevExpress.XtraEditors.PictureEdit();
             this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
@@ -70,8 +72,10 @@
             this.colfiyat = new DevExpress.XtraGrid.Columns.GridColumn();
             this.coladet = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colresim = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.btnEtkenBul = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtEtkenMadde.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picResim.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAd.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).BeginInit();
@@ -120,6 +124,9 @@
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.btnEtkenBul);
+            this.groupControl1.Controls.Add(this.labelControl7);
+            this.groupControl1.Controls.Add(this.txtEtkenMadde);
             this.groupControl1.Controls.Add(this.btnResimSec);
             this.groupControl1.Controls.Add(this.picResim);
             this.groupControl1.Controls.Add(this.labelControl6);
@@ -143,13 +150,32 @@
             this.groupControl1.TabIndex = 1;
             this.groupControl1.Text = "İLAÇ İŞLEMLERİ";
             // 
+            // labelControl7
+            // 
+            this.labelControl7.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.labelControl7.Appearance.Options.UseFont = true;
+            this.labelControl7.Location = new System.Drawing.Point(18, 257);
+            this.labelControl7.Name = "labelControl7";
+            this.labelControl7.Size = new System.Drawing.Size(114, 21);
+            this.labelControl7.TabIndex = 13;
+            this.labelControl7.Text = "ETKEN MADDE";
+            // 
+            // txtEtkenMadde
+            // 
+            this.txtEtkenMadde.Location = new System.Drawing.Point(138, 258);
+            this.txtEtkenMadde.Name = "txtEtkenMadde";
+            this.txtEtkenMadde.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtEtkenMadde.Properties.Appearance.Options.UseFont = true;
+            this.txtEtkenMadde.Size = new System.Drawing.Size(170, 24);
+            this.txtEtkenMadde.TabIndex = 3;
+            // 
             // btnResimSec
             // 
             this.btnResimSec.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.btnResimSec.Appearance.Options.UseFont = true;
             this.btnResimSec.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnResimSec.ImageOptions.Image")));
             this.btnResimSec.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleCenter;
-            this.btnResimSec.Location = new System.Drawing.Point(101, 358);
+            this.btnResimSec.Location = new System.Drawing.Point(243, 429);
             this.btnResimSec.Name = "btnResimSec";
             this.btnResimSec.Size = new System.Drawing.Size(100, 34);
             this.btnResimSec.TabIndex = 12;
@@ -158,7 +184,7 @@
             // 
             // picResim
             // 
-            this.picResim.Location = new System.Drawing.Point(101, 256);
+            this.picResim.Location = new System.Drawing.Point(101, 381);
             this.picResim.Name = "picResim";
             this.picResim.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.picResim.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
@@ -179,7 +205,7 @@
             // 
             this.labelControl3.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(21, 312);
+            this.labelControl3.Location = new System.Drawing.Point(21, 437);
             this.labelControl3.Name = "labelControl3";
             this.labelControl3.Size = new System.Drawing.Size(52, 21);
             this.labelControl3.TabIndex = 4;
@@ -208,7 +234,7 @@
             // btnSil
             // 
             this.btnSil.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.Image")));
-            this.btnSil.Location = new System.Drawing.Point(192, 483);
+            this.btnSil.Location = new System.Drawing.Point(188, 533);
             this.btnSil.Name = "btnSil";
             this.btnSil.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnSil.Size = new System.Drawing.Size(35, 35);
@@ -226,7 +252,7 @@
             // btnGuncelle
             // 
             this.btnGuncelle.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnGuncelle.ImageOptions.Image")));
-            this.btnGuncelle.Location = new System.Drawing.Point(336, 483);
+            this.btnGuncelle.Location = new System.Drawing.Point(329, 533);
             this.btnGuncelle.Name = "btnGuncelle";
             this.btnGuncelle.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnGuncelle.Size = new System.Drawing.Size(35, 35);
@@ -246,7 +272,7 @@
             // btnKaydet
             // 
             this.btnKaydet.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnKaydet.ImageOptions.Image")));
-            this.btnKaydet.Location = new System.Drawing.Point(5, 483);
+            this.btnKaydet.Location = new System.Drawing.Point(5, 533);
             this.btnKaydet.Name = "btnKaydet";
             this.btnKaydet.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnKaydet.Size = new System.Drawing.Size(35, 35);
@@ -359,6 +385,19 @@
             this.colresim.Visible = true;
             this.colresim.VisibleIndex = 5;
             // 
+            // btnEtkenBul
+            // 
+            this.btnEtkenBul.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnEtkenBul.Appearance.Options.UseFont = true;
+            this.btnEtkenBul.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
+            this.btnEtkenBul.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnEtkenBul.ImageOptions.SvgImage")));
+            this.btnEtkenBul.Location = new System.Drawing.Point(138, 298);
+            this.btnEtkenBul.Name = "btnEtkenBul";
+            this.btnEtkenBul.Size = new System.Drawing.Size(170, 48);
+            this.btnEtkenBul.TabIndex = 14;
+            this.btnEtkenBul.Text = "Yapay Zeka ile Bul";
+            this.btnEtkenBul.Click += new System.EventHandler(this.btnEtkenBul_Click);
+            // 
             // FrmIlaclar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -372,6 +411,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
             this.groupControl1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtEtkenMadde.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picResim.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAd.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).EndInit();
@@ -411,5 +451,8 @@
         private DevExpress.XtraEditors.LabelControl labelControl6;
         private DevExpress.XtraEditors.SimpleButton btnResimSec;
         private DevExpress.XtraEditors.PictureEdit picResim;
+        private DevExpress.XtraEditors.LabelControl labelControl7;
+        private DevExpress.XtraEditors.TextEdit txtEtkenMadde;
+        private DevExpress.XtraEditors.SimpleButton btnEtkenBul;
     }
 }

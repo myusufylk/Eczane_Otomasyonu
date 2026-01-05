@@ -50,6 +50,7 @@ namespace Eczane_Otomasyonu
             this.txtAdet = new DevExpress.XtraEditors.TextEdit();
             this.txtHastaAdi = new DevExpress.XtraEditors.TextEdit();
             this.btnRiskAnaliz = new DevExpress.XtraEditors.SimpleButton();
+            this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).BeginInit();
@@ -65,6 +66,7 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -118,7 +120,7 @@ namespace Eczane_Otomasyonu
             // 
             this.btnSepeteEkle.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.btnSepeteEkle.Appearance.Options.UseFont = true;
-            this.btnSepeteEkle.Location = new System.Drawing.Point(17, 311);
+            this.btnSepeteEkle.Location = new System.Drawing.Point(16, 410);
             this.btnSepeteEkle.Name = "btnSepeteEkle";
             this.btnSepeteEkle.Size = new System.Drawing.Size(389, 23);
             this.btnSepeteEkle.TabIndex = 3;
@@ -127,7 +129,7 @@ namespace Eczane_Otomasyonu
             // 
             // lueIlac
             // 
-            this.lueIlac.Location = new System.Drawing.Point(5, 142);
+            this.lueIlac.Location = new System.Drawing.Point(4, 144);
             this.lueIlac.Name = "lueIlac";
             this.lueIlac.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.lueIlac.Properties.Appearance.Options.UseFont = true;
@@ -145,7 +147,7 @@ namespace Eczane_Otomasyonu
             this.btnReceteYukle.Appearance.Options.UseFont = true;
             this.btnReceteYukle.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleRight;
             this.btnReceteYukle.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnReceteYukle.ImageOptions.SvgImage")));
-            this.btnReceteYukle.Location = new System.Drawing.Point(5, 81);
+            this.btnReceteYukle.Location = new System.Drawing.Point(4, 83);
             this.btnReceteYukle.Name = "btnReceteYukle";
             this.btnReceteYukle.Size = new System.Drawing.Size(401, 38);
             this.btnReceteYukle.TabIndex = 6;
@@ -156,7 +158,7 @@ namespace Eczane_Otomasyonu
             // 
             this.lblToplamTutar.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.lblToplamTutar.Appearance.Options.UseFont = true;
-            this.lblToplamTutar.Location = new System.Drawing.Point(174, 345);
+            this.lblToplamTutar.Location = new System.Drawing.Point(173, 444);
             this.lblToplamTutar.Name = "lblToplamTutar";
             this.lblToplamTutar.Size = new System.Drawing.Size(0, 21);
             this.lblToplamTutar.TabIndex = 4;
@@ -164,7 +166,7 @@ namespace Eczane_Otomasyonu
             // dateTarih
             // 
             this.dateTarih.EditValue = null;
-            this.dateTarih.Location = new System.Drawing.Point(208, 270);
+            this.dateTarih.Location = new System.Drawing.Point(207, 369);
             this.dateTarih.Name = "dateTarih";
             this.dateTarih.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -176,7 +178,7 @@ namespace Eczane_Otomasyonu
             // txtBarkod
             // 
             this.txtBarkod.EditValue = "";
-            this.txtBarkod.Location = new System.Drawing.Point(5, 31);
+            this.txtBarkod.Location = new System.Drawing.Point(4, 33);
             this.txtBarkod.Name = "txtBarkod";
             this.txtBarkod.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtBarkod.Properties.Appearance.Options.UseFont = true;
@@ -190,7 +192,7 @@ namespace Eczane_Otomasyonu
             // 
             this.labelControl1.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelControl1.Appearance.Options.UseFont = true;
-            this.labelControl1.Location = new System.Drawing.Point(156, 269);
+            this.labelControl1.Location = new System.Drawing.Point(155, 368);
             this.labelControl1.Name = "labelControl1";
             this.labelControl1.Size = new System.Drawing.Size(46, 21);
             this.labelControl1.TabIndex = 8;
@@ -198,6 +200,7 @@ namespace Eczane_Otomasyonu
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.pictureEdit1);
             this.groupControl1.Controls.Add(this.btnRiskAnaliz);
             this.groupControl1.Controls.Add(this.txtTc);
             this.groupControl1.Controls.Add(this.txtFiyat);
@@ -210,14 +213,14 @@ namespace Eczane_Otomasyonu
             this.groupControl1.Controls.Add(this.btnReceteYukle);
             this.groupControl1.Controls.Add(this.lueIlac);
             this.groupControl1.Controls.Add(this.btnSepeteEkle);
-            this.groupControl1.Location = new System.Drawing.Point(575, 35);
+            this.groupControl1.Location = new System.Drawing.Point(578, 12);
             this.groupControl1.Name = "groupControl1";
-            this.groupControl1.Size = new System.Drawing.Size(411, 441);
+            this.groupControl1.Size = new System.Drawing.Size(431, 541);
             this.groupControl1.TabIndex = 1;
             // 
             // txtTc
             // 
-            this.txtTc.Location = new System.Drawing.Point(17, 393);
+            this.txtTc.Location = new System.Drawing.Point(16, 492);
             this.txtTc.Name = "txtTc";
             this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtTc.Properties.Appearance.Options.UseFont = true;
@@ -227,7 +230,7 @@ namespace Eczane_Otomasyonu
             // 
             // txtFiyat
             // 
-            this.txtFiyat.Location = new System.Drawing.Point(5, 202);
+            this.txtFiyat.Location = new System.Drawing.Point(4, 204);
             this.txtFiyat.Name = "txtFiyat";
             this.txtFiyat.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtFiyat.Properties.Appearance.Options.UseFont = true;
@@ -238,7 +241,7 @@ namespace Eczane_Otomasyonu
             // txtAdet
             // 
             this.txtAdet.EditValue = "";
-            this.txtAdet.Location = new System.Drawing.Point(228, 202);
+            this.txtAdet.Location = new System.Drawing.Point(227, 204);
             this.txtAdet.Name = "txtAdet";
             this.txtAdet.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtAdet.Properties.Appearance.Options.UseFont = true;
@@ -249,7 +252,7 @@ namespace Eczane_Otomasyonu
             // txtHastaAdi
             // 
             this.txtHastaAdi.EditValue = "";
-            this.txtHastaAdi.Location = new System.Drawing.Point(215, 393);
+            this.txtHastaAdi.Location = new System.Drawing.Point(214, 492);
             this.txtHastaAdi.Name = "txtHastaAdi";
             this.txtHastaAdi.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtHastaAdi.Properties.Appearance.Options.UseFont = true;
@@ -263,12 +266,20 @@ namespace Eczane_Otomasyonu
             this.btnRiskAnaliz.Appearance.Options.UseFont = true;
             this.btnRiskAnaliz.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightBottom;
             this.btnRiskAnaliz.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnRiskAnaliz.ImageOptions.SvgImage")));
-            this.btnRiskAnaliz.Location = new System.Drawing.Point(17, 340);
+            this.btnRiskAnaliz.Location = new System.Drawing.Point(16, 439);
             this.btnRiskAnaliz.Name = "btnRiskAnaliz";
             this.btnRiskAnaliz.Size = new System.Drawing.Size(389, 35);
             this.btnRiskAnaliz.TabIndex = 20;
             this.btnRiskAnaliz.Text = " Risk Analizi";
             this.btnRiskAnaliz.Click += new System.EventHandler(this.btnRiskAnaliz_Click);
+            // 
+            // pictureEdit1
+            // 
+            this.pictureEdit1.Location = new System.Drawing.Point(139, 253);
+            this.pictureEdit1.Name = "pictureEdit1";
+            this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
+            this.pictureEdit1.Size = new System.Drawing.Size(152, 96);
+            this.pictureEdit1.TabIndex = 21;
             // 
             // FrmHareketler
             // 
@@ -297,6 +308,7 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -322,5 +334,6 @@ namespace Eczane_Otomasyonu
         private TextEdit txtHastaAdi;
         private TextEdit txtTc;
         private SimpleButton btnRiskAnaliz;
+        private PictureEdit pictureEdit1;
     }
 }

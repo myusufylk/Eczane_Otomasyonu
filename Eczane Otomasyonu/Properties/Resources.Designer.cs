@@ -59,15 +59,5 @@ namespace Eczane_Otomasyonu.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   System.Drawing.Bitmap türünde yerelleştirilmiş bir kaynak arar.
-        /// </summary>
-        internal static System.Drawing.Bitmap dükkanlogo {
-            get {
-                object obj = ResourceManager.GetObject("dükkanlogo", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }
