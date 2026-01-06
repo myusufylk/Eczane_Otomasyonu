@@ -114,7 +114,9 @@ namespace Eczane_Otomasyonu
                 KilidiAc(); return;
             }
 
-            if ((kucukMesaj.Contains("stok") || kucukMesaj.Contains("tanımla")) && kucukMesaj.Contains("ekle"))
+            // --- DÜZELTİLEN KISIM: STOK KELİMELERİ ---
+            // Artık "stoğa", "depo", "giriş" kelimelerini de tanıyor.
+            if ((kucukMesaj.Contains("stok") || kucukMesaj.Contains("stoğ") || kucukMesaj.Contains("depo") || kucukMesaj.Contains("tanımla")) && kucukMesaj.Contains("ekle"))
             {
                 KomutEkle(mesaj);
                 KilidiAc(); return;
@@ -266,6 +268,9 @@ namespace Eczane_Otomasyonu
                     MesajEkle($"❌ '{arananKelime}' bulunamadı. Yeni kayıt ekranı açılıyor.", false);
                     FrmIlaclar fr = (FrmIlaclar)Application.OpenForms["FrmIlaclar"];
                     if (fr == null) { fr = new FrmIlaclar(); fr.MdiParent = this; fr.Show(); }
+
+                    // --- DÜZELTME: Verileri forma gönder ---
+                    fr.OtomatikDoldur(arananKelime, adet.ToString());
                 }
             }
             catch (Exception ex) { MesajEkle("Hata: " + ex.Message, false); }

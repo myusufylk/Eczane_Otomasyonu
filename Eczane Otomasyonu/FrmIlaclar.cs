@@ -63,14 +63,14 @@ namespace Eczane_Otomasyonu
             gridView1.OptionsBehavior.Editable = false;
         }
 
-        // --- LİSTELEME METODU (EtkenMadde Eklendi) ---
+        // --- LİSTELEME METODU (Barkod ve EtkenMadde Eklendi) ---
         void listele()
         {
             try
             {
                 DataTable dt = new DataTable();
-                // SQL Sorgusuna 'EtkenMadde' eklendi
-                SqlDataAdapter da = new SqlDataAdapter("Select siraNo, ilacKodu, ilacAdı, fiyat, adet, EtkenMadde, resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
+                // SQL Sorgusuna 'Barkod' ve 'EtkenMadde' eklendi
+                SqlDataAdapter da = new SqlDataAdapter("Select siraNo, Barkod, ilacKodu, ilacAdı, fiyat, adet, EtkenMadde, resim From Ilaclar WHERE KullaniciID=" + MevcutKullanici.Id, bgl.baglanti());
                 da.Fill(dt);
                 gridControl1.DataSource = dt;
 
@@ -80,11 +80,12 @@ namespace Eczane_Otomasyonu
 
                 // Başlıkları Güzelleştir
                 if (gridView1.Columns["siraNo"] != null) gridView1.Columns["siraNo"].Caption = "SIRA NO";
+                if (gridView1.Columns["Barkod"] != null) gridView1.Columns["Barkod"].Caption = "BARKOD"; // Yeni Başlık
                 if (gridView1.Columns["ilacKodu"] != null) gridView1.Columns["ilacKodu"].Caption = "İLAÇ KODU";
                 if (gridView1.Columns["ilacAdı"] != null) gridView1.Columns["ilacAdı"].Caption = "İLAÇ ADI";
                 if (gridView1.Columns["fiyat"] != null) gridView1.Columns["fiyat"].Caption = "FİYAT";
                 if (gridView1.Columns["adet"] != null) gridView1.Columns["adet"].Caption = "ADET";
-                if (gridView1.Columns["EtkenMadde"] != null) gridView1.Columns["EtkenMadde"].Caption = "ETKEN MADDE"; // Yeni Başlık
+                if (gridView1.Columns["EtkenMadde"] != null) gridView1.Columns["EtkenMadde"].Caption = "ETKEN MADDE";
             }
             catch { }
         }
@@ -105,6 +106,10 @@ namespace Eczane_Otomasyonu
             // Eğer tasarımda txtEtkenMadde varsa temizle
             var txtEtken = this.Controls.Find("txtEtkenMadde", true);
             if (txtEtken.Length > 0) txtEtken[0].Text = "";
+
+            // Eğer tasarımda txtBarkod varsa temizle
+            var txtBarkod = this.Controls.Find("txtBarkod", true);
+            if (txtBarkod.Length > 0) txtBarkod[0].Text = "";
 
             picResim.Image = null;
             resimDosyaYolu = "";
@@ -138,6 +143,11 @@ namespace Eczane_Otomasyonu
                     if (txtEtken.Length > 0 && dr["EtkenMadde"] != DBNull.Value)
                         txtEtken[0].Text = dr["EtkenMadde"].ToString();
 
+                    // Barkodu getir
+                    var txtBarkod = this.Controls.Find("txtBarkod", true);
+                    if (txtBarkod.Length > 0 && dr["Barkod"] != DBNull.Value)
+                        txtBarkod[0].Text = dr["Barkod"].ToString();
+
                     resimYukle(dr["resim"].ToString());
                 }
                 bgl.baglanti().Close();
@@ -145,7 +155,7 @@ namespace Eczane_Otomasyonu
             catch { }
         }
 
-        // --- GRID SATIR TIKLAMA (Etken Maddeyi Kutuya Taşıma) ---
+        // --- GRID SATIR TIKLAMA (Verileri Kutulara Taşıma) ---
         private void gridView1_RowClick(object sender, DevExpress.XtraGrid.Views.Grid.RowClickEventArgs e)
         {
             try
@@ -162,6 +172,10 @@ namespace Eczane_Otomasyonu
                     // Etken Maddeyi Yükle
                     var txtEtken = this.Controls.Find("txtEtkenMadde", true);
                     if (txtEtken.Length > 0) txtEtken[0].Text = dr["EtkenMadde"].ToString();
+
+                    // Barkodu Yükle
+                    var txtBarkod = this.Controls.Find("txtBarkod", true);
+                    if (txtBarkod.Length > 0) txtBarkod[0].Text = dr["Barkod"].ToString();
 
                     resimYukle(dr["resim"].ToString());
                 }
@@ -304,6 +318,11 @@ namespace Eczane_Otomasyonu
             var txtEtken = this.Controls.Find("txtEtkenMadde", true);
             if (txtEtken.Length > 0) etkenMaddeDegeri = txtEtken[0].Text;
 
+            // Barkod kutusunun değerini al (Güvenli şekilde)
+            string barkodDegeri = "";
+            var txtBarkod = this.Controls.Find("txtBarkod", true);
+            if (txtBarkod.Length > 0) barkodDegeri = txtBarkod[0].Text;
+
             islemYapiliyor = true;
             SqlConnection conn = bgl.baglanti();
 
@@ -322,14 +341,15 @@ namespace Eczane_Otomasyonu
                     {
                         if (MessageBox.Show("İlaç zaten var. Eklensin mi?", "Onay", MessageBoxButtons.YesNo) == DialogResult.Yes)
                         {
-                            // UPDATE işlemine EtkenMadde eklendi
-                            SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4, EtkenMadde=@p6 where ilacKodu=@p5 AND KullaniciID=@uid", conn);
+                            // UPDATE işlemine Barkod ve EtkenMadde eklendi
+                            SqlCommand komut = new SqlCommand("Update Ilaclar set adet=adet+@p1, fiyat=@p2, resim=@p3, ilacAdı=@p4, EtkenMadde=@p6, Barkod=@p8 where ilacKodu=@p5 AND KullaniciID=@uid", conn);
                             komut.Parameters.AddWithValue("@p1", adet);
                             komut.Parameters.AddWithValue("@p2", fiyat);
                             komut.Parameters.AddWithValue("@p3", resimDosyaYolu);
                             komut.Parameters.AddWithValue("@p4", txtAd.Text);
                             komut.Parameters.AddWithValue("@p5", txtKod.Text);
-                            komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri); // Yeni
+                            komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri);
+                            komut.Parameters.AddWithValue("@p8", barkodDegeri); // Barkod
                             komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                             komut.ExecuteNonQuery();
                             MessageBox.Show("Eklendi.");
@@ -337,14 +357,15 @@ namespace Eczane_Otomasyonu
                     }
                     else
                     {
-                        // INSERT işlemine EtkenMadde eklendi
-                        SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim, EtkenMadde, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @p6, @uid)", conn);
+                        // INSERT işlemine Barkod ve EtkenMadde eklendi
+                        SqlCommand komut = new SqlCommand("insert into Ilaclar (ilacKodu, ilacAdı, fiyat, adet, resim, EtkenMadde, Barkod, KullaniciID) values (@p1, @p2, @p3, @p4, @p5, @p6, @p8, @uid)", conn);
                         komut.Parameters.AddWithValue("@p1", txtKod.Text);
                         komut.Parameters.AddWithValue("@p2", txtAd.Text);
                         komut.Parameters.AddWithValue("@p3", fiyat);
                         komut.Parameters.AddWithValue("@p4", adet);
                         komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
-                        komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri); // Yeni
+                        komut.Parameters.AddWithValue("@p6", etkenMaddeDegeri);
+                        komut.Parameters.AddWithValue("@p8", barkodDegeri); // Barkod
                         komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                         komut.ExecuteNonQuery();
                         MessageBox.Show("Kaydedildi.");
@@ -353,15 +374,16 @@ namespace Eczane_Otomasyonu
                 else if (tur == "guncelle")
                 {
                     string id = txtsiraNo.Text;
-                    // UPDATE işlemine EtkenMadde eklendi
-                    SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5, EtkenMadde=@p7 where siraNo=@p6 AND KullaniciID=@uid", conn);
+                    // UPDATE işlemine Barkod ve EtkenMadde eklendi
+                    SqlCommand komut = new SqlCommand("Update Ilaclar set ilacKodu=@p1, ilacAdı=@p2, fiyat=@p3, adet=@p4, resim=@p5, EtkenMadde=@p7, Barkod=@p8 where siraNo=@p6 AND KullaniciID=@uid", conn);
                     komut.Parameters.AddWithValue("@p1", txtKod.Text);
                     komut.Parameters.AddWithValue("@p2", txtAd.Text);
                     komut.Parameters.AddWithValue("@p3", fiyat);
                     komut.Parameters.AddWithValue("@p4", adet);
                     komut.Parameters.AddWithValue("@p5", resimDosyaYolu);
                     komut.Parameters.AddWithValue("@p6", id);
-                    komut.Parameters.AddWithValue("@p7", etkenMaddeDegeri); // Yeni
+                    komut.Parameters.AddWithValue("@p7", etkenMaddeDegeri);
+                    komut.Parameters.AddWithValue("@p8", barkodDegeri); // Barkod
                     komut.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     komut.ExecuteNonQuery();
                     MessageBox.Show("Güncellendi.");

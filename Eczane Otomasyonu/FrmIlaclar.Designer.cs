@@ -29,23 +29,24 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DevExpress.DataAccess.Sql.SelectQuery selectQuery3 = new DevExpress.DataAccess.Sql.SelectQuery();
-            DevExpress.DataAccess.Sql.Column column13 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression13 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Table table3 = new DevExpress.DataAccess.Sql.Table();
-            DevExpress.DataAccess.Sql.Column column14 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression14 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column15 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression15 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column16 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression16 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column17 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression17 = new DevExpress.DataAccess.Sql.ColumnExpression();
-            DevExpress.DataAccess.Sql.Column column18 = new DevExpress.DataAccess.Sql.Column();
-            DevExpress.DataAccess.Sql.ColumnExpression columnExpression18 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.SelectQuery selectQuery2 = new DevExpress.DataAccess.Sql.SelectQuery();
+            DevExpress.DataAccess.Sql.Column column7 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression7 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Table table2 = new DevExpress.DataAccess.Sql.Table();
+            DevExpress.DataAccess.Sql.Column column8 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression8 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column9 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression9 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column10 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression10 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column11 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression11 = new DevExpress.DataAccess.Sql.ColumnExpression();
+            DevExpress.DataAccess.Sql.Column column12 = new DevExpress.DataAccess.Sql.Column();
+            DevExpress.DataAccess.Sql.ColumnExpression columnExpression12 = new DevExpress.DataAccess.Sql.ColumnExpression();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmIlaclar));
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
+            this.btnEtkenBul = new DevExpress.XtraEditors.SimpleButton();
             this.labelControl7 = new DevExpress.XtraEditors.LabelControl();
             this.txtEtkenMadde = new DevExpress.XtraEditors.TextEdit();
             this.btnResimSec = new DevExpress.XtraEditors.SimpleButton();
@@ -72,7 +73,8 @@
             this.colfiyat = new DevExpress.XtraGrid.Columns.GridColumn();
             this.coladet = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colresim = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.btnEtkenBul = new DevExpress.XtraEditors.SimpleButton();
+            this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
+            this.txtBarkod = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtEtkenMadde.Properties)).BeginInit();
@@ -84,46 +86,49 @@
             ((System.ComponentModel.ISupportInitialize)(this.txtsiraNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtBarkod.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // sqlDataSource1
             // 
             this.sqlDataSource1.ConnectionName = "yusuf.Eczane_Otomasyonu.dbo1";
             this.sqlDataSource1.Name = "sqlDataSource1";
-            columnExpression13.ColumnName = "sıraNo";
-            table3.MetaSerializable = "<Meta X=\"30\" Y=\"30\" Width=\"125\" Height=\"183\" />";
-            table3.Name = "ılaclar";
-            columnExpression13.Table = table3;
-            column13.Expression = columnExpression13;
-            columnExpression14.ColumnName = "ilacKodu";
-            columnExpression14.Table = table3;
-            column14.Expression = columnExpression14;
-            columnExpression15.ColumnName = "ilacAdı";
-            columnExpression15.Table = table3;
-            column15.Expression = columnExpression15;
-            columnExpression16.ColumnName = "fiyat";
-            columnExpression16.Table = table3;
-            column16.Expression = columnExpression16;
-            columnExpression17.ColumnName = "adet";
-            columnExpression17.Table = table3;
-            column17.Expression = columnExpression17;
-            columnExpression18.ColumnName = "resim";
-            columnExpression18.Table = table3;
-            column18.Expression = columnExpression18;
-            selectQuery3.Columns.Add(column13);
-            selectQuery3.Columns.Add(column14);
-            selectQuery3.Columns.Add(column15);
-            selectQuery3.Columns.Add(column16);
-            selectQuery3.Columns.Add(column17);
-            selectQuery3.Columns.Add(column18);
-            selectQuery3.Name = "ılaclar";
-            selectQuery3.Tables.Add(table3);
+            columnExpression7.ColumnName = "sıraNo";
+            table2.MetaSerializable = "<Meta X=\"30\" Y=\"30\" Width=\"125\" Height=\"183\" />";
+            table2.Name = "ılaclar";
+            columnExpression7.Table = table2;
+            column7.Expression = columnExpression7;
+            columnExpression8.ColumnName = "ilacKodu";
+            columnExpression8.Table = table2;
+            column8.Expression = columnExpression8;
+            columnExpression9.ColumnName = "ilacAdı";
+            columnExpression9.Table = table2;
+            column9.Expression = columnExpression9;
+            columnExpression10.ColumnName = "fiyat";
+            columnExpression10.Table = table2;
+            column10.Expression = columnExpression10;
+            columnExpression11.ColumnName = "adet";
+            columnExpression11.Table = table2;
+            column11.Expression = columnExpression11;
+            columnExpression12.ColumnName = "resim";
+            columnExpression12.Table = table2;
+            column12.Expression = columnExpression12;
+            selectQuery2.Columns.Add(column7);
+            selectQuery2.Columns.Add(column8);
+            selectQuery2.Columns.Add(column9);
+            selectQuery2.Columns.Add(column10);
+            selectQuery2.Columns.Add(column11);
+            selectQuery2.Columns.Add(column12);
+            selectQuery2.Name = "ılaclar";
+            selectQuery2.Tables.Add(table2);
             this.sqlDataSource1.Queries.AddRange(new DevExpress.DataAccess.Sql.SqlQuery[] {
-            selectQuery3});
+            selectQuery2});
             this.sqlDataSource1.ResultSchemaSerializable = resources.GetString("sqlDataSource1.ResultSchemaSerializable");
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.txtBarkod);
+            this.groupControl1.Controls.Add(this.labelControl8);
             this.groupControl1.Controls.Add(this.btnEtkenBul);
             this.groupControl1.Controls.Add(this.labelControl7);
             this.groupControl1.Controls.Add(this.txtEtkenMadde);
@@ -150,11 +155,24 @@
             this.groupControl1.TabIndex = 1;
             this.groupControl1.Text = "İLAÇ İŞLEMLERİ";
             // 
+            // btnEtkenBul
+            // 
+            this.btnEtkenBul.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnEtkenBul.Appearance.Options.UseFont = true;
+            this.btnEtkenBul.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
+            this.btnEtkenBul.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnEtkenBul.ImageOptions.SvgImage")));
+            this.btnEtkenBul.Location = new System.Drawing.Point(130, 361);
+            this.btnEtkenBul.Name = "btnEtkenBul";
+            this.btnEtkenBul.Size = new System.Drawing.Size(170, 48);
+            this.btnEtkenBul.TabIndex = 14;
+            this.btnEtkenBul.Text = "Yapay Zeka ile Bul";
+            this.btnEtkenBul.Click += new System.EventHandler(this.btnEtkenBul_Click);
+            // 
             // labelControl7
             // 
             this.labelControl7.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelControl7.Appearance.Options.UseFont = true;
-            this.labelControl7.Location = new System.Drawing.Point(18, 257);
+            this.labelControl7.Location = new System.Drawing.Point(10, 320);
             this.labelControl7.Name = "labelControl7";
             this.labelControl7.Size = new System.Drawing.Size(114, 21);
             this.labelControl7.TabIndex = 13;
@@ -162,7 +180,7 @@
             // 
             // txtEtkenMadde
             // 
-            this.txtEtkenMadde.Location = new System.Drawing.Point(138, 258);
+            this.txtEtkenMadde.Location = new System.Drawing.Point(130, 321);
             this.txtEtkenMadde.Name = "txtEtkenMadde";
             this.txtEtkenMadde.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.txtEtkenMadde.Properties.Appearance.Options.UseFont = true;
@@ -175,7 +193,7 @@
             this.btnResimSec.Appearance.Options.UseFont = true;
             this.btnResimSec.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnResimSec.ImageOptions.Image")));
             this.btnResimSec.ImageOptions.Location = DevExpress.XtraEditors.ImageLocation.MiddleCenter;
-            this.btnResimSec.Location = new System.Drawing.Point(243, 429);
+            this.btnResimSec.Location = new System.Drawing.Point(243, 495);
             this.btnResimSec.Name = "btnResimSec";
             this.btnResimSec.Size = new System.Drawing.Size(100, 34);
             this.btnResimSec.TabIndex = 12;
@@ -184,7 +202,7 @@
             // 
             // picResim
             // 
-            this.picResim.Location = new System.Drawing.Point(101, 381);
+            this.picResim.Location = new System.Drawing.Point(101, 447);
             this.picResim.Name = "picResim";
             this.picResim.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
             this.picResim.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
@@ -205,7 +223,7 @@
             // 
             this.labelControl3.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(21, 437);
+            this.labelControl3.Location = new System.Drawing.Point(21, 503);
             this.labelControl3.Name = "labelControl3";
             this.labelControl3.Size = new System.Drawing.Size(52, 21);
             this.labelControl3.TabIndex = 4;
@@ -234,7 +252,7 @@
             // btnSil
             // 
             this.btnSil.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnSil.ImageOptions.Image")));
-            this.btnSil.Location = new System.Drawing.Point(188, 533);
+            this.btnSil.Location = new System.Drawing.Point(188, 599);
             this.btnSil.Name = "btnSil";
             this.btnSil.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnSil.Size = new System.Drawing.Size(35, 35);
@@ -252,7 +270,7 @@
             // btnGuncelle
             // 
             this.btnGuncelle.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnGuncelle.ImageOptions.Image")));
-            this.btnGuncelle.Location = new System.Drawing.Point(329, 533);
+            this.btnGuncelle.Location = new System.Drawing.Point(329, 599);
             this.btnGuncelle.Name = "btnGuncelle";
             this.btnGuncelle.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnGuncelle.Size = new System.Drawing.Size(35, 35);
@@ -272,7 +290,7 @@
             // btnKaydet
             // 
             this.btnKaydet.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("btnKaydet.ImageOptions.Image")));
-            this.btnKaydet.Location = new System.Drawing.Point(5, 533);
+            this.btnKaydet.Location = new System.Drawing.Point(5, 599);
             this.btnKaydet.Name = "btnKaydet";
             this.btnKaydet.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btnKaydet.Size = new System.Drawing.Size(35, 35);
@@ -385,18 +403,22 @@
             this.colresim.Visible = true;
             this.colresim.VisibleIndex = 5;
             // 
-            // btnEtkenBul
+            // labelControl8
             // 
-            this.btnEtkenBul.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.btnEtkenBul.Appearance.Options.UseFont = true;
-            this.btnEtkenBul.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
-            this.btnEtkenBul.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnEtkenBul.ImageOptions.SvgImage")));
-            this.btnEtkenBul.Location = new System.Drawing.Point(138, 298);
-            this.btnEtkenBul.Name = "btnEtkenBul";
-            this.btnEtkenBul.Size = new System.Drawing.Size(170, 48);
-            this.btnEtkenBul.TabIndex = 14;
-            this.btnEtkenBul.Text = "Yapay Zeka ile Bul";
-            this.btnEtkenBul.Click += new System.EventHandler(this.btnEtkenBul_Click);
+            this.labelControl8.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.labelControl8.Appearance.Options.UseFont = true;
+            this.labelControl8.Location = new System.Drawing.Point(5, 265);
+            this.labelControl8.Name = "labelControl8";
+            this.labelControl8.Size = new System.Drawing.Size(84, 17);
+            this.labelControl8.TabIndex = 15;
+            this.labelControl8.Text = "BARKOD NO :";
+            // 
+            // txtBarkod
+            // 
+            this.txtBarkod.Location = new System.Drawing.Point(95, 264);
+            this.txtBarkod.Name = "txtBarkod";
+            this.txtBarkod.Size = new System.Drawing.Size(106, 20);
+            this.txtBarkod.TabIndex = 16;
             // 
             // FrmIlaclar
             // 
@@ -420,6 +442,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.txtsiraNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtBarkod.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -454,5 +477,7 @@
         private DevExpress.XtraEditors.LabelControl labelControl7;
         private DevExpress.XtraEditors.TextEdit txtEtkenMadde;
         private DevExpress.XtraEditors.SimpleButton btnEtkenBul;
+        private DevExpress.XtraEditors.TextEdit txtBarkod;
+        private DevExpress.XtraEditors.LabelControl labelControl8;
     }
 }
