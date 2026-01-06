@@ -45,12 +45,12 @@ namespace Eczane_Otomasyonu
             this.txtBarkod = new DevExpress.XtraEditors.TextEdit();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
             this.groupControl1 = new DevExpress.XtraEditors.GroupControl();
-            this.txtTc = new DevExpress.XtraEditors.TextEdit();
+            this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
+            this.btnRiskAnaliz = new DevExpress.XtraEditors.SimpleButton();
             this.txtFiyat = new DevExpress.XtraEditors.TextEdit();
             this.txtAdet = new DevExpress.XtraEditors.TextEdit();
             this.txtHastaAdi = new DevExpress.XtraEditors.TextEdit();
-            this.btnRiskAnaliz = new DevExpress.XtraEditors.SimpleButton();
-            this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
+            this.txtTc = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridSepet)).BeginInit();
@@ -62,11 +62,11 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.txtBarkod.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).BeginInit();
             this.groupControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -200,9 +200,9 @@ namespace Eczane_Otomasyonu
             // 
             // groupControl1
             // 
+            this.groupControl1.Controls.Add(this.txtTc);
             this.groupControl1.Controls.Add(this.pictureEdit1);
             this.groupControl1.Controls.Add(this.btnRiskAnaliz);
-            this.groupControl1.Controls.Add(this.txtTc);
             this.groupControl1.Controls.Add(this.txtFiyat);
             this.groupControl1.Controls.Add(this.txtAdet);
             this.groupControl1.Controls.Add(this.txtHastaAdi);
@@ -218,15 +218,26 @@ namespace Eczane_Otomasyonu
             this.groupControl1.Size = new System.Drawing.Size(431, 541);
             this.groupControl1.TabIndex = 1;
             // 
-            // txtTc
+            // pictureEdit1
             // 
-            this.txtTc.Location = new System.Drawing.Point(16, 492);
-            this.txtTc.Name = "txtTc";
-            this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtTc.Properties.Appearance.Options.UseFont = true;
-            this.txtTc.Properties.NullValuePrompt = "TC NO :";
-            this.txtTc.Size = new System.Drawing.Size(183, 28);
-            this.txtTc.TabIndex = 19;
+            this.pictureEdit1.Location = new System.Drawing.Point(139, 253);
+            this.pictureEdit1.Name = "pictureEdit1";
+            this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
+            this.pictureEdit1.Size = new System.Drawing.Size(152, 96);
+            this.pictureEdit1.TabIndex = 21;
+            // 
+            // btnRiskAnaliz
+            // 
+            this.btnRiskAnaliz.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.btnRiskAnaliz.Appearance.Options.UseFont = true;
+            this.btnRiskAnaliz.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightBottom;
+            this.btnRiskAnaliz.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnRiskAnaliz.ImageOptions.SvgImage")));
+            this.btnRiskAnaliz.Location = new System.Drawing.Point(16, 439);
+            this.btnRiskAnaliz.Name = "btnRiskAnaliz";
+            this.btnRiskAnaliz.Size = new System.Drawing.Size(389, 35);
+            this.btnRiskAnaliz.TabIndex = 20;
+            this.btnRiskAnaliz.Text = " Risk Analizi";
+            this.btnRiskAnaliz.Click += new System.EventHandler(this.btnRiskAnaliz_Click);
             // 
             // txtFiyat
             // 
@@ -260,26 +271,16 @@ namespace Eczane_Otomasyonu
             this.txtHastaAdi.Size = new System.Drawing.Size(183, 28);
             this.txtHastaAdi.TabIndex = 15;
             // 
-            // btnRiskAnaliz
+            // txtTc
             // 
-            this.btnRiskAnaliz.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.btnRiskAnaliz.Appearance.Options.UseFont = true;
-            this.btnRiskAnaliz.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightBottom;
-            this.btnRiskAnaliz.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnRiskAnaliz.ImageOptions.SvgImage")));
-            this.btnRiskAnaliz.Location = new System.Drawing.Point(16, 439);
-            this.btnRiskAnaliz.Name = "btnRiskAnaliz";
-            this.btnRiskAnaliz.Size = new System.Drawing.Size(389, 35);
-            this.btnRiskAnaliz.TabIndex = 20;
-            this.btnRiskAnaliz.Text = " Risk Analizi";
-            this.btnRiskAnaliz.Click += new System.EventHandler(this.btnRiskAnaliz_Click);
-            // 
-            // pictureEdit1
-            // 
-            this.pictureEdit1.Location = new System.Drawing.Point(139, 253);
-            this.pictureEdit1.Name = "pictureEdit1";
-            this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
-            this.pictureEdit1.Size = new System.Drawing.Size(152, 96);
-            this.pictureEdit1.TabIndex = 21;
+            this.txtTc.EditValue = "";
+            this.txtTc.Location = new System.Drawing.Point(18, 492);
+            this.txtTc.Name = "txtTc";
+            this.txtTc.Properties.Appearance.Font = new System.Drawing.Font("Franklin Gothic Book", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtTc.Properties.Appearance.Options.UseFont = true;
+            this.txtTc.Properties.NullValuePrompt = "HASTA ADI :";
+            this.txtTc.Size = new System.Drawing.Size(183, 28);
+            this.txtTc.TabIndex = 22;
             // 
             // FrmHareketler
             // 
@@ -304,11 +305,11 @@ namespace Eczane_Otomasyonu
             ((System.ComponentModel.ISupportInitialize)(this.groupControl1)).EndInit();
             this.groupControl1.ResumeLayout(false);
             this.groupControl1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtFiyat.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtAdet.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtHastaAdi.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtTc.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -332,8 +333,8 @@ namespace Eczane_Otomasyonu
         private TextEdit txtAdet;
         private TextEdit txtFiyat;
         private TextEdit txtHastaAdi;
-        private TextEdit txtTc;
         private SimpleButton btnRiskAnaliz;
         private PictureEdit pictureEdit1;
+        private TextEdit txtTc;
     }
 }

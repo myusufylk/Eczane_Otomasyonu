@@ -555,7 +555,7 @@ namespace Eczane_Otomasyonu
 
             try
             {
-                // Hasta Kaydı
+                // 1. Hasta Kaydı (Otomatik) - MEVCUT YAPI
                 SqlCommand cmdHasta = new SqlCommand("Select count(*) From Hastalar where TC=@p1 AND KullaniciID=@uid", conn);
                 cmdHasta.Parameters.AddWithValue("@p1", txtTc.Text);
                 cmdHasta.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
@@ -565,6 +565,7 @@ namespace Eczane_Otomasyonu
                     string ad = tamIsim, soyad = "";
                     int bosluk = tamIsim.LastIndexOf(' ');
                     if (bosluk > 0) { ad = tamIsim.Substring(0, bosluk); soyad = tamIsim.Substring(bosluk + 1); }
+
                     SqlCommand cmdEkle = new SqlCommand("Insert into Hastalar (TC, Ad, Soyad, KullaniciID) values (@p1, @p2, @p3, @uid)", conn);
                     cmdEkle.Parameters.AddWithValue("@p1", txtTc.Text);
                     cmdEkle.Parameters.AddWithValue("@p2", ad);
@@ -573,16 +574,17 @@ namespace Eczane_Otomasyonu
                     cmdEkle.ExecuteNonQuery();
                 }
 
-                // Satış Hareketleri
+                // 2. Satış Hareketleri - MEVCUT YAPI (Önce burası çalışmalı ki CRM kontrolünde bunları sayalım)
                 foreach (var item in _sepet)
                 {
-                    // DÜZELTME: Veritabanında adet sütunu olduğu için burası doğruydu, koruduk.
+                    // Stok Düşme
                     SqlCommand cmdDus = new SqlCommand("Update Ilaclar set adet=adet-@p1 where ilacAdı=@p2 AND KullaniciID=@uid", conn);
                     cmdDus.Parameters.AddWithValue("@p1", item.Adet);
                     cmdDus.Parameters.AddWithValue("@p2", item.IlacAdi);
                     cmdDus.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     cmdDus.ExecuteNonQuery();
 
+                    // Hareketi Kaydetme
                     SqlCommand cmdHareket = new SqlCommand("Insert into Hareketler (ilacAdi, adet, toplamFiyat, tarih, hastaAdi, tcNo, KullaniciID) values (@p1,@p2,@p3,@p4,@p5,@p6,@uid)", conn);
                     cmdHareket.Parameters.AddWithValue("@p1", item.IlacAdi);
                     cmdHareket.Parameters.AddWithValue("@p2", item.Adet);
@@ -593,6 +595,78 @@ namespace Eczane_Otomasyonu
                     cmdHareket.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
                     cmdHareket.ExecuteNonQuery();
                 }
+
+                // =========================================================================
+                // YENİ DÜZENLENMİŞ CRM MODÜLÜ (TEST İÇİN GARANTİ ÇALIŞAN VERSİYON)
+                // =========================================================================
+                try
+                {
+                    // A) Müşteri Eski mi? (Mantık: Veritabanındaki toplam satır sayısı > Şu an sepetteki ürün sayısı)
+                    // Eğer veritabanında 5 kayıt var ama sepette 2 ürün varsa, demek ki önceden 3 tane almış -> ESKİ MÜŞTERİ.
+                    SqlCommand cmdToplam = new SqlCommand("SELECT COUNT(*) FROM Hareketler WHERE tcNo=@p1 AND KullaniciID=@uid", conn);
+                    cmdToplam.Parameters.AddWithValue("@p1", txtTc.Text);
+                    cmdToplam.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                    int toplamSatisSayisi = Convert.ToInt32(cmdToplam.ExecuteScalar());
+                    bool eskiMusteriMi = toplamSatisSayisi > _sepet.Count;
+
+                    // B) Bilgileri Eksik mi?
+                    SqlCommand cmdBilgi = new SqlCommand("SELECT Telefon, Adres, Guvence FROM Hastalar WHERE TC=@p1 AND KullaniciID=@uid", conn);
+                    cmdBilgi.Parameters.AddWithValue("@p1", txtTc.Text);
+                    cmdBilgi.Parameters.AddWithValue("@uid", MevcutKullanici.Id);
+
+                    SqlDataReader drBilgi = cmdBilgi.ExecuteReader();
+                    bool eksikBilgiVar = false;
+
+                    if (drBilgi.Read())
+                    {
+                        string tel = drBilgi["Telefon"] != DBNull.Value ? drBilgi["Telefon"].ToString() : "";
+                        string adres = drBilgi["Adres"] != DBNull.Value ? drBilgi["Adres"].ToString() : "";
+                        string guvence = drBilgi["Guvence"] != DBNull.Value ? drBilgi["Guvence"].ToString() : "";
+
+                        // Telefon çok kısaysa veya adres/güvence boşsa eksik kabul et
+                        if (string.IsNullOrWhiteSpace(tel) || tel.Length < 5 ||
+                            string.IsNullOrWhiteSpace(adres) || adres.Length < 3 ||
+                            string.IsNullOrWhiteSpace(guvence) || guvence == "YOK")
+                        {
+                            eksikBilgiVar = true;
+                        }
+                    }
+                    drBilgi.Close(); // Okuyucuyu mutlaka kapatıyoruz!
+
+                    // C) KARAR: Eski müşteri ise (yani 2. kez geliyorsa) VE bilgisi eksikse sor
+                    if (eskiMusteriMi && eksikBilgiVar)
+                    {
+                        DialogResult secim = MessageBox.Show(
+                            $"Bu hasta ({txtTc.Text}) daha önce de alışveriş yapmış ({toplamSatisSayisi} kalem ürün).\n" +
+                            "Ancak Telefon, Adres veya Güvence bilgileri eksik.\n\n" +
+                            "Müşteri sadakati için bilgileri şimdi güncellemek ister misiniz?",
+                            "CRM - Müşteri Bilgi Tavsiyesi",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question);
+
+                        if (secim == DialogResult.Yes)
+                        {
+                            // Hasta Kartları formunu aç
+                            FrmHastalar fr = new FrmHastalar();
+                            if (Application.OpenForms["FrmAnaModul"] != null)
+                                fr.MdiParent = Application.OpenForms["FrmAnaModul"];
+
+                            fr.Show();
+
+                            // Kolaylık olsun diye TC'yi panoya kopyala
+                            Clipboard.SetText(txtTc.Text);
+                            MessageBox.Show("TC Kimlik No kopyalandı. Hasta kartlarında yapıştırarak aratabilirsiniz.", "Bilgi");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Hata varsa görelim (Boş bırakırsak hatayı bulamayız)
+                    MessageBox.Show("CRM Tavsiye Hatası: " + ex.Message);
+                }
+                // =========================================================================
+
                 conn.Close();
 
                 MessageBox.Show("Satış Tamamlandı.");
@@ -604,8 +678,15 @@ namespace Eczane_Otomasyonu
                 temizle();
                 if (pictureEdit1 != null) pictureEdit1.Image = null;
             }
-            catch (Exception ex) { MessageBox.Show("Hata: " + ex.Message); if (conn.State == ConnectionState.Open) conn.Close(); }
-            finally { islemYapiliyor = false; }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata: " + ex.Message);
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
+            finally
+            {
+                islemYapiliyor = false;
+            }
         }
 
         private void FisYazdir()
