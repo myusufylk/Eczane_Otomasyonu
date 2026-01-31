@@ -965,7 +965,7 @@ namespace Eczane_Otomasyonu
 
         private async Task<string> GeminiyeSor(string soru)
         {
-            string apiKey = "AIzaSyDvqHcWCL6MFH5RfY4d3w_hH5nZ9cVIhbg";
+            string apiKey = "API KEY GIRINIZ";// Almış Olduğunuz Apı Anahtarını Giriniz
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
 
             using (HttpClient client = new HttpClient())
