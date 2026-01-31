@@ -12,7 +12,7 @@ namespace Eczane_Otomasyonu
         private static readonly HttpClient client = new HttpClient();
 
         // BURAYA KENDİ API KEY'İNİZİ YAPIŞTIRIN
-        private static string ApiKey = "AIzaSyDvqHcWCL6MFH5RfY4d3w_hH5nZ9cVIhbg";
+        private static string ApiKey = "API KEY GIRINIZ";
 
         // ✅ GÜNCELLEME: Listeden seçilen en uygun model (Gemini 2.5 Flash)
         private static string BaseUrl => $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={ApiKey}";
